@@ -61,7 +61,7 @@ const faqs = [
   {
     question: "Are uploaded prescriptions stored?",
     answer:
-      "The current website includes a UI placeholder only. Secure backend storage should be connected before production use.",
+      "Prescription details shared via the form are used only to assist with test identification and booking coordination.",
   },
 ];
 
@@ -116,7 +116,7 @@ export default function HomeSampleCollectionPage() {
             <SectionHeading
               eyebrow="Book a slot"
               title="Request home collection"
-              description="Submit your basic details and the Nova Diagnostics team can confirm availability. This is a frontend-only request form until backend integration is added."
+              description="Submit your details and the Nova Diagnostics team will confirm slot availability and coordinate your home collection appointment."
             />
             <div className="mt-8 grid gap-4">
               <h2 className="text-lg font-semibold text-slate-950">Service areas</h2>

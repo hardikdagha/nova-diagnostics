@@ -74,7 +74,7 @@ export default async function PackageDetailPage({ params }: PageProps) {
     {
       question: "Are prices final on the website?",
       answer:
-        "No. Prices are shown as contact-based placeholders until Nova Diagnostics confirms the final rate card.",
+        "Website prices are indicative. Please confirm the current rate with the lab before booking.",
     },
   ];
 
@@ -139,7 +139,7 @@ export default async function PackageDetailPage({ params }: PageProps) {
             <section>
               <h2 className="text-2xl font-semibold text-slate-950">Included test groups</h2>
               <p className="mt-3 leading-7 text-slate-600">
-                Exact parameters should be finalized by Nova Diagnostics before launch. The list below is an editable patient-friendly package outline.
+                The parameters below are a patient-friendly overview. Please confirm the exact test list and pricing with the lab before booking.
               </p>
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 {healthPackage.includedTests.map((item) => (

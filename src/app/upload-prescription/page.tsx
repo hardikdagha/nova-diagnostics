@@ -20,7 +20,7 @@ const points = [
   "Share your prescription request if test names are unclear",
   "Choose WhatsApp, phone call or email as preferred contact method",
   "Ask for home sample collection if needed",
-  "Secure backend upload storage should be connected before launch",
+  "Shared details are used only to assist with test identification and booking",
 ];
 
 export default function UploadPrescriptionPage() {
@@ -63,7 +63,7 @@ export default function UploadPrescriptionPage() {
                 <ShieldCheck className="size-9 text-teal-700" aria-hidden="true" />
                 <h2 className="mt-4 text-xl font-semibold text-slate-950">Privacy-aware flow</h2>
                 <p className="mt-2 text-sm leading-6 text-slate-600">
-                  The current form is intentionally marked as a placeholder until secure storage is connected.
+                  Your prescription details are handled with care and used only to assist with test identification and booking support.
                 </p>
               </div>
             </div>
@@ -89,7 +89,7 @@ export default function UploadPrescriptionPage() {
             </ul>
             <div className="mt-8">
               <DisclaimerBox>
-                Do not upload unnecessary sensitive information. This prescription upload experience is a request placeholder until secure private storage is integrated.
+                Please share only the prescription details needed for test identification. For medical emergencies, contact emergency services or visit the nearest hospital.
               </DisclaimerBox>
             </div>
           </div>

@@ -91,14 +91,18 @@ export function Footer() {
                   <span>WhatsApp booking support</span>
                 </a>
               </li>
-              <li className="flex gap-3">
-                <Mail className="mt-0.5 size-4 shrink-0 text-cyan-200" aria-hidden="true" />
-                <span>{siteConfig.email}</span>
-              </li>
-              <li>
-                <span className="font-semibold text-white">Timings:</span>{" "}
-                {siteConfig.timings}
-              </li>
+              {siteConfig.email && !siteConfig.email.startsWith("[") ? (
+                <li className="flex gap-3">
+                  <Mail className="mt-0.5 size-4 shrink-0 text-cyan-200" aria-hidden="true" />
+                  <span>{siteConfig.email}</span>
+                </li>
+              ) : null}
+              {siteConfig.timings && !siteConfig.timings.startsWith("[") ? (
+                <li>
+                  <span className="font-semibold text-white">Timings:</span>{" "}
+                  {siteConfig.timings}
+                </li>
+              ) : null}
             </ul>
             <h2 className="mt-8 text-sm font-semibold uppercase text-cyan-100">
               Medical leadership
@@ -116,7 +120,7 @@ export function Footer() {
         </div>
         <div className="mt-12 border-t border-white/10 pt-6 text-xs text-slate-300">
           <p>
-            Copyright {new Date().getFullYear()} Nova Diagnostics. Website content should be reviewed and updated by the lab before public launch.
+            &copy; {new Date().getFullYear()} Nova Diagnostics, Vashi, Navi Mumbai. Information on this website is for general awareness and does not constitute medical advice.
           </p>
         </div>
       </div>

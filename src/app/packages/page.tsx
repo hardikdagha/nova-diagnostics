@@ -28,7 +28,7 @@ export default function PackagesPage() {
               eyebrow="Health packages"
               level="h1"
               title="Preventive checkups for practical health screening"
-              description="Choose from routine, diabetes, thyroid, senior citizen, heart health, women's wellness and vitamin deficiency checks. Final price and exact parameters should be confirmed with the lab."
+              description="Choose from routine, diabetes, thyroid, senior citizen, heart health, women's wellness and vitamin deficiency checks. Confirm pricing and parameters with the lab before booking."
             />
             <div className="grid gap-3 sm:grid-cols-2">
               <a href={getWhatsappUrl("Hello Nova Diagnostics, I would like to know about health packages.")} className="btn-primary">

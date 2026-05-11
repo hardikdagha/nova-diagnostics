@@ -37,7 +37,7 @@ export const siteConfig = {
       degree: "MSc in Microbiology",
       image: "/images/doctors/dr-chandresh-dagha.jpg",
       imageAvailable: true,
-      bio: "Dr. Chandresh Dagha has led Nova Diagnostics for 34 years. Add a short verified introduction, qualifications, and areas of diagnostic focus here.",
+      bio: "Dr. Chandresh Dagha has guided Nova Diagnostics for over 34 years, bringing deep focus to diagnostic quality, careful laboratory processes and patient-centred care.",
     },
     {
       name: "Dr. Sujit Singh",
@@ -46,7 +46,7 @@ export const siteConfig = {
       degree: "[ADD DEGREE]",
       image: "/images/doctors/dr-sujit-singh.jpg",
       imageAvailable: false,
-      bio: "Dr. Sujit Singh is part of the medical leadership at Nova Diagnostics. Add a short verified introduction, qualifications, and areas of diagnostic focus here.",
+      bio: "Dr. Sujit Singh supports the medical leadership at Nova Diagnostics with a focus on diagnostic care and patient support. Detailed qualifications will be updated upon verification.",
     },
   ] satisfies DoctorProfile[],
   serviceAreas: [

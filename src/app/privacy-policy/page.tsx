@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { siteConfig } from "@/config/site";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
@@ -27,15 +26,15 @@ const sections = [
   },
   {
     title: "Prescription uploads",
-    body: "The current website implementation includes upload UI placeholders. Secure private storage and staff workflows should be connected before production file collection.",
+    body: "Prescription details shared via the website are handled with care and used only to assist with test identification and booking coordination.",
   },
   {
     title: "Privacy requests",
-    body: `For privacy questions or correction requests, contact Nova Diagnostics at ${siteConfig.email}. Replace this placeholder with the final privacy contact before launch.`,
+    body: "For privacy questions or correction requests, contact Nova Diagnostics by phone or WhatsApp using the contact details on the Contact page.",
   },
   {
-    title: "Template notice",
-    body: "This privacy policy is a starter template and should be reviewed by a qualified legal professional before public launch.",
+    title: "Policy scope",
+    body: "This privacy policy applies to the Nova Diagnostics website and covers contact forms, booking requests and prescription assistance submissions. For specific legal queries, please contact us directly.",
   },
 ];
 

@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
-import { CheckCircle2, HeartHandshake, MapPin, Microscope, Phone, Timer } from "lucide-react";
+import { CheckCircle2, ClipboardList, FileText, HeartHandshake, Home, MapPin, Microscope, Phone, Timer } from "lucide-react";
 import { MedicalLeadership } from "@/components/people/MedicalLeadership";
 import { TeamSection } from "@/components/people/TeamSection";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { CTASection } from "@/components/ui/CTASection";
-import { PhotoPlaceholder } from "@/components/ui/PhotoPlaceholder";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { TrustBadge } from "@/components/ui/TrustBadge";
 import { siteConfig } from "@/config/site";
@@ -53,7 +52,7 @@ export default function AboutPage() {
             <div className="card-premium p-6">
               <BrandLogo variant="feature" />
               <p className="mt-5 text-sm leading-6 text-slate-600">
-                {siteConfig.tagline} is used as the guiding tone for this website: calm, helpful and easy for patients to act on.
+                Nova Diagnostics is a pathology and diagnostics laboratory in Vashi, Navi Mumbai, focused on clear test information, patient support and quality diagnostic services.
               </p>
             </div>
           </div>
@@ -66,7 +65,7 @@ export default function AboutPage() {
             <SectionHeading
               eyebrow="Our Approach to Diagnostic Care"
               title="Simple booking, clear information and patient-first support"
-              description="The website focuses on what patients need before a lab visit: test information, preparation, home collection, prescription support, contact details and directions."
+              description="Our focus is on what patients need: clear test information, simple booking, prescription guidance, home collection and friendly support at every step."
             />
             <div className="mt-8 grid gap-4 sm:grid-cols-2">
               <TrustBadge icon={Microscope} label="Quality-focused diagnostic services" />
@@ -76,10 +75,42 @@ export default function AboutPage() {
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <PhotoPlaceholder label="Add reception photo" />
-            <PhotoPlaceholder label="Add sample collection area photo" />
-            <PhotoPlaceholder label="Add lab exterior photo" />
-            <PhotoPlaceholder label="Add team photo" />
+            <div className="card-premium flex flex-col gap-3 p-6">
+              <span className="flex size-11 items-center justify-center rounded-[8px] bg-cyan-50 text-teal-700">
+                <Microscope className="size-6" aria-hidden="true" />
+              </span>
+              <h3 className="text-lg font-semibold text-slate-950">Diagnostic laboratory</h3>
+              <p className="text-sm leading-6 text-slate-600">
+                Blood tests, health packages and routine diagnostic services for patients in Vashi and nearby Navi Mumbai areas.
+              </p>
+            </div>
+            <div className="card-premium flex flex-col gap-3 p-6">
+              <span className="flex size-11 items-center justify-center rounded-[8px] bg-cyan-50 text-teal-700">
+                <Home className="size-6" aria-hidden="true" />
+              </span>
+              <h3 className="text-lg font-semibold text-slate-950">Home sample collection</h3>
+              <p className="text-sm leading-6 text-slate-600">
+                Convenient home collection across selected Navi Mumbai areas including Vashi, Sanpada, Nerul and more.
+              </p>
+            </div>
+            <div className="card-premium flex flex-col gap-3 p-6">
+              <span className="flex size-11 items-center justify-center rounded-[8px] bg-cyan-50 text-teal-700">
+                <FileText className="size-6" aria-hidden="true" />
+              </span>
+              <h3 className="text-lg font-semibold text-slate-950">Digital reports</h3>
+              <p className="text-sm leading-6 text-slate-600">
+                Reports can be shared digitally through defined lab processes for convenient access from home.
+              </p>
+            </div>
+            <div className="card-premium flex flex-col gap-3 p-6">
+              <span className="flex size-11 items-center justify-center rounded-[8px] bg-cyan-50 text-teal-700">
+                <ClipboardList className="size-6" aria-hidden="true" />
+              </span>
+              <h3 className="text-lg font-semibold text-slate-950">Prescription support</h3>
+              <p className="text-sm leading-6 text-slate-600">
+                Upload your prescription and our team helps identify the required tests and assists with booking.
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -93,7 +124,7 @@ export default function AboutPage() {
           <SectionHeading
             eyebrow="Quality, Care and Patient Support"
             title="Built around calm processes and clear communication"
-            description="Medical claims, accreditations and credentials should only be expanded after Nova Diagnostics verifies and approves the exact wording."
+            description="At Nova Diagnostics, every process is shaped by patient comfort, careful sample handling, timely reporting and clear communication."
           />
           <div className="grid gap-4 sm:grid-cols-2">
             {focusAreas.map((item) => (

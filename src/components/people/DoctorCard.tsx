@@ -35,15 +35,10 @@ export function DoctorCard({ doctor }: DoctorCardProps) {
         ) : (
           <div className="flex h-72 items-center justify-center p-8 text-center">
             <div>
-              <span className="mx-auto flex size-20 items-center justify-center rounded-[8px] bg-white text-2xl font-semibold text-[#061A33] shadow-sm">
-                {initials || <UserRound className="size-8" aria-hidden="true" />}
+              <span className="mx-auto flex size-24 items-center justify-center rounded-[8px] bg-white text-3xl font-semibold text-[#061A33] shadow-sm">
+                {initials || <UserRound className="size-10" aria-hidden="true" />}
               </span>
-              <p className="mt-4 text-sm font-semibold text-slate-950">
-                Add doctor photo
-              </p>
-              <p className="mt-1 text-xs leading-5 text-slate-500">
-                Save the image at {doctor.image}
-              </p>
+              <p className="mt-5 text-base font-semibold text-slate-800">{doctor.name}</p>
             </div>
           </div>
         )}
@@ -55,7 +50,9 @@ export function DoctorCard({ doctor }: DoctorCardProps) {
         <h3 className="mt-2 text-2xl font-semibold text-slate-950">
           {doctor.name}
         </h3>
-        <p className="mt-1 font-medium text-slate-600">{doctor.degree}</p>
+        {doctor.degree && !doctor.degree.startsWith("[") ? (
+          <p className="mt-1 font-medium text-slate-600">{doctor.degree}</p>
+        ) : null}
         <p className="mt-4 text-sm leading-6 text-slate-600">{doctor.bio}</p>
         <a href={getDoctorCallUrl(doctor.phone)} className="btn-secondary mt-5 w-full">
           <Phone className="size-4" aria-hidden="true" />

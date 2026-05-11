@@ -35,7 +35,7 @@ const faqs = [
   {
     question: "Can I get directions to the lab?",
     answer:
-      "Yes. Use the directions CTA. The exact Google Maps URL should be updated in the site configuration after the new public listing is ready.",
+      "Yes. Use the Get Directions button to open the lab location in Google Maps and get turn-by-turn directions.",
   },
   {
     question: "Are digital reports available?",

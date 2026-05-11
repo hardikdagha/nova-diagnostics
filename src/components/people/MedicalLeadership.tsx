@@ -12,7 +12,7 @@ export function MedicalLeadership({ preview = false }: { preview?: boolean }) {
             title="Guided by diagnostic leadership"
             description={
               preview
-                ? "Meet the doctors associated with Nova Diagnostics. Detailed credentials and introductions can be expanded as verified information is added."
+                ? "Meet the doctors who guide Nova Diagnostics, bringing careful focus to diagnostic accuracy and patient care."
                 : "Nova Diagnostics is supported by medical leadership focused on careful processes, clear communication and patient support."
             }
           />

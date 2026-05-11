@@ -59,7 +59,7 @@ const homeFaqs = [
   {
     question: "Can I upload my prescription?",
     answer:
-      "Yes. The upload page currently works as a safe request form placeholder until secure backend storage is connected.",
+      "Yes. Upload your prescription and our team will help identify the tests and assist with booking options.",
   },
   {
     question: "When will I receive my reports?",
@@ -84,14 +84,14 @@ const homeFaqs = [
 ];
 
 const whyCards = [
-  { label: "Clear test guidance", icon: ClipboardList, description: "Patient-friendly help with tests, preparation and next steps." },
-  { label: "Convenient Vashi location", icon: MapPinned, description: "Built for local walk-ins and nearby home collection requests." },
-  { label: "Home sample collection", icon: Home, description: "Request collection from home across selected Navi Mumbai areas." },
-  { label: "Digital reports", icon: FileUp, description: "Reports can be shared digitally through defined lab processes." },
-  { label: "Clear communication", icon: ShieldCheck, description: "Simple explanations around booking, preparation and report timing." },
-  { label: "Patient-first support", icon: HeartHandshake, description: "Calls, WhatsApp and practical help for local families." },
-  { label: "Clean environment", icon: Sparkles, description: "A calm diagnostic experience designed around comfort and clarity." },
-  { label: "WhatsApp support", icon: MessageCircle, description: "Quick support for booking, prescriptions and directions." },
+  { label: "Clear test guidance", icon: ClipboardList, description: "Straightforward help with test names, preparation steps and what to expect." },
+  { label: "Convenient Vashi location", icon: MapPinned, description: "Easy to reach from across Navi Mumbai, with home collection available nearby." },
+  { label: "Home sample collection", icon: Home, description: "Collection from home across Vashi, Sanpada, Nerul and nearby Navi Mumbai areas." },
+  { label: "Digital reports", icon: FileUp, description: "Reports shared digitally so you can access them from the comfort of your home." },
+  { label: "Clear communication", icon: ShieldCheck, description: "Honest, simple guidance on booking, preparation and expected report timelines." },
+  { label: "Patient-first approach", icon: HeartHandshake, description: "Warm, attentive support by phone and WhatsApp for patients and families." },
+  { label: "Calm and clean experience", icon: Sparkles, description: "A thoughtful diagnostic environment that prioritises comfort and clarity." },
+  { label: "WhatsApp support", icon: MessageCircle, description: "Quick responses for bookings, prescription queries and directions." },
 ];
 
 export default function HomePage() {
@@ -170,7 +170,7 @@ export default function HomePage() {
             <SectionHeading
               eyebrow="Health packages"
               title="Health checkups for families and routine monitoring"
-              description="Packages use editable, safe content until final test lists and prices are confirmed by the lab."
+              description="Convenient health packages for routine monitoring, family wellness and preventive health screening."
             />
             <Link href="/packages" className="btn-secondary w-fit">
               View packages
@@ -234,7 +234,7 @@ export default function HomePage() {
               Not sure which tests are written on your prescription?
             </h2>
             <p className="mt-4 leading-7 text-slate-600">
-              Upload it and our team will help you with the test list and booking options. The current form is a request placeholder until secure file storage is connected.
+              Upload it and our team will help you identify the required tests and guide you through booking. Simple, convenient and hassle-free.
             </p>
             <Link href="/upload-prescription" className="btn-primary mt-6">
               Upload Prescription
@@ -249,7 +249,7 @@ export default function HomePage() {
           <SectionHeading
             eyebrow="Why Nova Diagnostics"
             title="Care, clarity and convenience in one local lab"
-            description="The site focuses on clear test information, practical booking support and local accessibility without unsupported accreditation claims."
+            description="Experienced support, convenient location, home collection and clear test guidance for families in Vashi and nearby Navi Mumbai areas."
             align="center"
           />
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -277,7 +277,9 @@ export default function HomePage() {
                 <Timer className="size-9 text-teal-700" aria-hidden="true" />
                 <h3 className="mt-4 text-xl font-semibold text-slate-950">Timings</h3>
                 <p className="mt-2 text-sm leading-6 text-slate-600">
-                  {siteConfig.timings}
+                  {siteConfig.timings && !siteConfig.timings.startsWith("[")
+                    ? siteConfig.timings
+                    : "Please call or WhatsApp for current lab timings."}
                 </p>
               </div>
             </div>

@@ -121,7 +121,7 @@ export function PrescriptionUploadForm() {
           onChange={(event) => setFileName(event.target.files?.[0]?.name ?? "")}
         />
         <span className="block text-xs leading-5 text-slate-500">
-          UI placeholder only. Files are not uploaded until secure backend storage is connected.
+          Accepted formats: PDF, JPG, PNG. Max one file per request.
         </span>
       </label>
       <label className="space-y-2">

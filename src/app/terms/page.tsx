@@ -35,7 +35,7 @@ const terms = [
   },
   {
     title: "Refunds and cancellations",
-    body: "The final refund and cancellation policy should be finalized by Nova Diagnostics before public launch. This page is a starter policy template.",
+    body: "For cancellation or rescheduling requests, please contact Nova Diagnostics directly via call or WhatsApp. Refund decisions are subject to lab policy.",
   },
 ];
 
@@ -48,7 +48,7 @@ export default function TermsPage() {
           eyebrow="Terms and Refund Policy"
           level="h1"
           title="Website, booking and cancellation terms"
-          description="A practical starter policy for the current marketing and booking website."
+          description="Please read these terms before booking tests, using home collection or uploading prescriptions through this website."
         />
         <div className="mt-10 space-y-8">
           {terms.map((section) => (

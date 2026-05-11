@@ -17,12 +17,15 @@ export const metadata: Metadata = {
   },
 };
 
+const hasEmail = siteConfig.email && !siteConfig.email.startsWith("[");
+const hasTimings = siteConfig.timings && !siteConfig.timings.startsWith("[");
+
 const contactItems = [
   { label: "Address", value: siteConfig.address, icon: MapPin },
   { label: "Primary booking/contact", value: siteConfig.displayPhone, icon: Phone, href: getCallUrl() },
   { label: "WhatsApp", value: `Message Nova Diagnostics on ${siteConfig.displayPhone}`, icon: MessageCircle, href: getWhatsappUrl() },
-  { label: "Email", value: siteConfig.email, icon: Mail },
-  { label: "Timings", value: siteConfig.timings, icon: Timer },
+  ...(hasEmail ? [{ label: "Email", value: siteConfig.email, icon: Mail }] : []),
+  ...(hasTimings ? [{ label: "Timings", value: siteConfig.timings, icon: Timer }] : []),
 ];
 
 export default function ContactPage() {
@@ -148,7 +151,7 @@ export default function ContactPage() {
           <SectionHeading
             eyebrow="Directions"
             title="Visit the lab in Vashi"
-            description="The full address is listed below. Add the exact Google Maps URL in the site configuration when available."
+            description="Find Nova Diagnostics at Sungrace CHS, 1st Floor, Juhu Nagar, Sector 10, Vashi. Use the button below for turn-by-turn directions."
           />
           <MapBlock />
         </div>
