@@ -1,36 +1,47 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Nova Diagnostics Website
 
-## Getting Started
+Modern marketing and booking website for Nova Diagnostics, a local pathology and diagnostic laboratory in Vashi, Navi Mumbai.
 
-First, run the development server:
+## Run Locally
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Edit Business Details
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Update phone, WhatsApp, email, address, Google Maps URL, timings, NABL status and service areas in:
 
-## Learn More
+```text
+src/config/site.ts
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Edit Tests and Packages
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Test catalogue:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```text
+src/data/tests.ts
+```
 
-## Deploy on Vercel
+Health packages:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```text
+src/data/packages.ts
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Blog posts:
+
+```text
+src/data/blog.ts
+```
+
+## Notes
+
+- Form submissions are frontend placeholders and show a success message.
+- Prescription upload is UI-only until secure backend storage is implemented.
+- No patient login, report portal, LIMS, payment, AI diagnosis or doctor dashboard is included.
+- Legal policy pages are starter templates and should be reviewed before launch.
