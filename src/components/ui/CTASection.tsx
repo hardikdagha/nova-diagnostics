@@ -37,11 +37,11 @@ export function CTASection({
                 {primaryLabel}
                 <ArrowRight className="size-4" aria-hidden="true" />
               </Link>
-              <a href={getWhatsappUrl()} className="btn-secondary bg-transparent border-white/30 text-white hover:bg-white/10 hover:border-white/60 hover:text-white">
+              <a href={getWhatsappUrl()} className="btn-primary bg-white text-[#061A33] hover:bg-cyan-50">
                 <MessageCircle className="size-4" aria-hidden="true" />
                 WhatsApp
               </a>
-              <a href={getCallUrl()} className="btn-secondary bg-transparent border-white/30 text-white hover:bg-white/10 hover:border-white/60 hover:text-white">
+              <a href={getCallUrl()} className="btn-primary bg-white text-[#061A33] hover:bg-cyan-50">
                 <Phone className="size-4" aria-hidden="true" />
                 Call
               </a>
