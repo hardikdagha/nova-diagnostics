@@ -147,7 +147,7 @@ export default function HomeSampleCollectionPage() {
               ))}
             </div>
           </div>
-          <div className="card-premium p-6">
+          <div className="card-premium flex flex-col p-6">
             <h2 className="text-2xl font-semibold text-slate-950">Preparation checklist</h2>
             <ul className="mt-5 grid gap-4">
               {checklist.map((item) => (
@@ -157,6 +157,12 @@ export default function HomeSampleCollectionPage() {
                 </li>
               ))}
             </ul>
+            <div className="mt-6 flex-1 rounded-[8px] bg-[#061A33]/5 p-4">
+              <p className="text-sm font-semibold text-slate-950">Before your appointment</p>
+              <p className="mt-1.5 text-sm leading-6 text-slate-600">
+                Our team will confirm preparation instructions, fasting requirements, and expected report timelines when coordinating your home collection slot.
+              </p>
+            </div>
           </div>
         </div>
       </section>

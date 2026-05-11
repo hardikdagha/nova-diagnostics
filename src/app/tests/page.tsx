@@ -28,7 +28,7 @@ export default function TestsPage() {
               eyebrow="Test catalogue"
               level="h1"
               title="Search lab tests before you book"
-              description="Browse routine blood tests, diabetes monitoring, thyroid profiles, vitamins, fever tests and more. Prices are intentionally marked as contact-based until Nova Diagnostics confirms the final rate card."
+              description="Browse routine blood tests, diabetes monitoring, thyroid profiles, vitamins, fever tests and more. Contact the lab to confirm current pricing and availability."
             />
             <div className="grid gap-3 sm:grid-cols-2">
               <a href={getWhatsappUrl("Hello Nova Diagnostics, I would like help booking a test.")} className="btn-primary">

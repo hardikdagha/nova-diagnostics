@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { BlogCard } from "@/components/BlogCard";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
-import { CTASection } from "@/components/ui/CTASection";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { blogPosts } from "@/data/blog";
 
@@ -37,10 +36,6 @@ export default function BlogPage() {
         </div>
       </section>
 
-      <CTASection
-        title="Have a prescription or test question?"
-        description="Contact Nova Diagnostics for test booking and preparation guidance."
-      />
     </>
   );
 }

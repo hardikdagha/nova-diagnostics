@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CalendarDays } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
-import { CTASection } from "@/components/ui/CTASection";
 import { DisclaimerBox } from "@/components/ui/DisclaimerBox";
 import { getBlogPostBySlug, blogPosts } from "@/data/blog";
 
@@ -80,10 +79,6 @@ export default async function BlogPostPage({ params }: PageProps) {
         </div>
       </article>
 
-      <CTASection
-        title="Need help with a test or checkup?"
-        description="Use Nova Diagnostics for booking, prescription assistance and home collection requests in Vashi."
-      />
     </>
   );
 }
