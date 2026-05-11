@@ -49,10 +49,10 @@ export default function AboutPage() {
                 Call {siteConfig.displayPhone}
               </a>
             </div>
-            <div className="card-premium p-6">
+            <div className="card-premium flex flex-col items-center p-8 text-center">
               <BrandLogo variant="feature" />
-              <p className="mt-5 text-sm leading-6 text-slate-600">
-                Nova Diagnostics is a pathology and diagnostics laboratory in Vashi, Navi Mumbai, focused on clear test information, patient support and quality diagnostic services.
+              <p className="mt-5 text-sm leading-6 text-slate-500">
+                A pathology and diagnostics laboratory in Vashi, Navi Mumbai — focused on clear test information, patient support and quality diagnostic services.
               </p>
             </div>
           </div>

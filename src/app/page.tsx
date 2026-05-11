@@ -1,30 +1,24 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
+  CalendarCheck,
   ClipboardList,
   FileUp,
+  FlaskConical,
   HeartHandshake,
   Home,
   MapPinned,
-  MessageCircle,
   ShieldCheck,
   Sparkles,
   Timer,
 } from "lucide-react";
-import { MedicalLeadership } from "@/components/people/MedicalLeadership";
-import { PackageCard } from "@/components/PackageCard";
-import { TestCard } from "@/components/TestCard";
-import { HeroSection } from "@/components/sections/HeroSection";
-import { CTASection } from "@/components/ui/CTASection";
 import { FAQAccordion } from "@/components/ui/FAQAccordion";
 import { MapBlock } from "@/components/ui/MapBlock";
 import { ReviewCTA } from "@/components/ui/ReviewCTA";
-import { SectionHeading } from "@/components/ui/SectionHeading";
-import { TrustBadge } from "@/components/ui/TrustBadge";
-import { TestSearch } from "@/components/TestSearch";
-import { packages } from "@/data/packages";
-import { getTestBySlug, tests } from "@/data/tests";
+import { HeroSection } from "@/components/sections/HeroSection";
+import { CTASection } from "@/components/ui/CTASection";
 import { siteConfig } from "@/config/site";
 import { safeJsonLd } from "@/lib/utils";
 
@@ -44,70 +38,72 @@ const homeFaqs = [
   {
     question: "Do I need fasting for all blood tests?",
     answer:
-      "No. Many routine tests do not need fasting, while some sugar or lipid tests may need preparation. Confirm fasting instructions while booking.",
+      "No. Many routine tests do not need fasting. Some sugar and lipid tests may require it. Confirm preparation while booking.",
   },
   {
     question: "Do you provide home sample collection?",
     answer:
-      "Yes, home sample collection can be requested in Vashi and nearby Navi Mumbai areas based on slot availability.",
+      "Yes, home collection is available in Vashi and nearby Navi Mumbai areas based on slot availability.",
   },
   {
     question: "How do I book a test?",
     answer:
-      "You can call, WhatsApp, use the booking form, or upload your prescription for test-list assistance.",
-  },
-  {
-    question: "Can I upload my prescription?",
-    answer:
-      "Yes. Upload your prescription and our team will help identify the tests and assist with booking options.",
+      "Call, WhatsApp, or use the online booking form. You can also upload your prescription for assistance.",
   },
   {
     question: "When will I receive my reports?",
     answer:
-      "Report timing depends on the test. Many routine tests are same day or next day, while some tests may take longer.",
+      "Many routine tests are ready same day or next day. Some tests take longer. Timelines are confirmed at booking.",
   },
   {
-    question: "Can reports be shared on WhatsApp?",
+    question: "Which areas do you serve for home collection?",
     answer:
-      "Digital report sharing can be coordinated through the lab's defined process. Confirm your preferred contact method while booking.",
-  },
-  {
-    question: "Which areas do you serve?",
-    answer:
-      "Nova Diagnostics serves Vashi, Sanpada, Kopar Khairane, Turbhe, Ghansoli, Nerul, Juinagar, APMC area and nearby Navi Mumbai areas.",
-  },
-  {
-    question: "Where is Nova Diagnostics located?",
-    answer:
-      "Nova Diagnostics is located at Sungrace CHS, 1st Floor, F1/C2, above Ribbons and Balloons Cake Shop, Juhu Nagar, Sector 10, Vashi, Navi Mumbai - 400703.",
+      "Vashi, Sanpada, Kopar Khairane, Turbhe, Ghansoli, Nerul, Juinagar, APMC area and nearby Navi Mumbai areas.",
   },
 ];
 
-const whyCards = [
-  { label: "Clear test guidance", icon: ClipboardList, description: "Straightforward help with test names, preparation steps and what to expect." },
-  { label: "Convenient Vashi location", icon: MapPinned, description: "Easy to reach from across Navi Mumbai, with home collection available nearby." },
-  { label: "Home sample collection", icon: Home, description: "Collection from home across Vashi, Sanpada, Nerul and nearby Navi Mumbai areas." },
-  { label: "Digital reports", icon: FileUp, description: "Reports shared digitally so you can access them from the comfort of your home." },
-  { label: "Clear communication", icon: ShieldCheck, description: "Honest, simple guidance on booking, preparation and expected report timelines." },
-  { label: "Patient-first approach", icon: HeartHandshake, description: "Warm, attentive support by phone and WhatsApp for patients and families." },
-  { label: "Calm and clean experience", icon: Sparkles, description: "A thoughtful diagnostic environment that prioritises comfort and clarity." },
-  { label: "WhatsApp support", icon: MessageCircle, description: "Quick responses for bookings, prescription queries and directions." },
+const services = [
+  {
+    icon: FlaskConical,
+    title: "Blood Tests",
+    description: "Routine and specialised blood tests with clear preparation guidance.",
+    href: "/tests",
+  },
+  {
+    icon: ClipboardList,
+    title: "Health Packages",
+    description: "Full-body checkups, diabetes, thyroid, senior citizen and wellness panels.",
+    href: "/packages",
+  },
+  {
+    icon: Home,
+    title: "Home Collection",
+    description: "Sample collection from your home across Vashi and nearby areas.",
+    href: "/home-sample-collection",
+  },
+  {
+    icon: FileUp,
+    title: "Upload Prescription",
+    description: "Share your prescription and we'll identify the tests and assist with booking.",
+    href: "/upload-prescription",
+  },
+];
+
+const whyPoints = [
+  { icon: ShieldCheck, label: "Careful processes", text: "Sample handling, reporting and communication done methodically." },
+  { icon: MapPinned, label: "Accessible location", text: "Conveniently located in Juhu Nagar, Sector 10, Vashi." },
+  { icon: HeartHandshake, label: "Patient-first care", text: "Warm, attentive support for patients and families." },
+  { icon: Sparkles, label: "Clean environment", text: "A calm, hygienic space designed for patient comfort." },
 ];
 
 export default function HomePage() {
-  const popularTests = siteConfig.popularTests
-    .flatMap((slug) => {
-      const test = getTestBySlug(slug);
-      return test ? [test] : [];
-    })
-    .slice(0, 10);
-
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "MedicalBusiness",
     name: siteConfig.businessName,
     url: siteConfig.url,
     telephone: siteConfig.phone,
+    email: siteConfig.email,
     image: `${siteConfig.url}/images/nova-lab-hero.jpg`,
     address: {
       "@type": "PostalAddress",
@@ -127,156 +123,180 @@ export default function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLd(jsonLd) }}
       />
+
+      {/* ── Hero ─────────────────────────────────────────────── */}
       <HeroSection />
 
-      <section className="section-pad bg-white">
+      {/* ── Stats strip ──────────────────────────────────────── */}
+      <div className="border-y border-slate-100 bg-white">
         <div className="container-page">
-          <SectionHeading
-            eyebrow="Quick test search"
-            title="Find routine tests without calling first"
-            description="Search commonly requested blood tests, profiles and health checkup options before booking."
-            align="center"
-          />
-          <div className="mt-8">
-            <TestSearch tests={tests} />
+          <dl className="grid grid-cols-2 divide-x divide-y divide-slate-100 lg:grid-cols-4 lg:divide-y-0">
+            {[
+              ["34+", "Years of service"],
+              ["8+", "Areas served"],
+              ["Home", "Sample collection"],
+              ["Digital", "Report sharing"],
+            ].map(([value, label]) => (
+              <div key={label} className="flex flex-col items-center px-6 py-7 text-center">
+                <dt className="text-2xl font-bold text-[#061A33] md:text-3xl">{value}</dt>
+                <dd className="mt-1 text-sm font-medium text-slate-500">{label}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </div>
+
+      {/* ── Core services grid ───────────────────────────────── */}
+      <section className="section-pad bg-[#FAFCFD]">
+        <div className="container-page">
+          <div className="mb-12 text-center">
+            <p className="text-sm font-semibold uppercase tracking-widest text-teal-700">Our Services</p>
+            <h2 className="mt-3 text-3xl font-semibold text-slate-950 md:text-4xl">
+              Everything you need, in one place
+            </h2>
+          </div>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {services.map((s) => {
+              const Icon = s.icon;
+              return (
+                <Link
+                  key={s.href}
+                  href={s.href}
+                  className="group card-premium flex flex-col p-6 transition-all hover:-translate-y-1"
+                >
+                  <span className="flex size-12 items-center justify-center rounded-[8px] bg-cyan-50 text-teal-700 transition group-hover:bg-[#061A33] group-hover:text-white">
+                    <Icon className="size-6" aria-hidden="true" />
+                  </span>
+                  <h3 className="mt-5 text-lg font-semibold text-slate-950">{s.title}</h3>
+                  <p className="mt-2 flex-1 text-sm leading-6 text-slate-500">{s.description}</p>
+                  <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-teal-700 transition group-hover:gap-2.5">
+                    Learn more <ArrowRight className="size-4" />
+                  </span>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      <section className="section-pad">
-        <div className="container-page">
-          <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-            <SectionHeading
-              eyebrow="Popular tests"
-              title="Common blood tests and diagnostic profiles"
-              description="Clear sample, fasting and report-time information for tests patients often search for in Vashi."
-            />
-            <Link href="/tests" className="btn-secondary w-fit">
-              View all tests
+      {/* ── Why Nova Diagnostics ─────────────────────────────── */}
+      <section className="section-pad bg-white">
+        <div className="container-page grid gap-12 lg:grid-cols-2 lg:items-center">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-widest text-teal-700">Why Nova Diagnostics</p>
+            <h2 className="mt-3 text-balance text-3xl font-semibold text-slate-950 md:text-4xl">
+              Care, clarity and convenience — in one local lab
+            </h2>
+            <p className="mt-5 text-lg leading-8 text-slate-500">
+              A diagnostic laboratory built around patient trust. Careful processes, honest communication and a team that genuinely supports you at every step.
+            </p>
+            <Link href="/about" className="btn-primary mt-8">
+              About the lab
               <ArrowRight className="size-4" aria-hidden="true" />
             </Link>
           </div>
-          <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {popularTests.map((test) => (
-              <TestCard key={test.slug} test={test} />
-            ))}
+          <div className="grid gap-4 sm:grid-cols-2">
+            {whyPoints.map((p) => {
+              const Icon = p.icon;
+              return (
+                <div key={p.label} className="card-premium p-6">
+                  <span className="flex size-10 items-center justify-center rounded-[8px] bg-cyan-50 text-teal-700">
+                    <Icon className="size-5" aria-hidden="true" />
+                  </span>
+                  <h3 className="mt-4 font-semibold text-slate-950">{p.label}</h3>
+                  <p className="mt-2 text-sm leading-6 text-slate-500">{p.text}</p>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      <section className="section-pad bg-white">
-        <div className="container-page">
-          <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-            <SectionHeading
-              eyebrow="Health packages"
-              title="Health checkups for families and routine monitoring"
-              description="Convenient health packages for routine monitoring, family wellness and preventive health screening."
-            />
-            <Link href="/packages" className="btn-secondary w-fit">
-              View packages
-              <ArrowRight className="size-4" aria-hidden="true" />
-            </Link>
-          </div>
-          <div className="mt-8 grid gap-5 lg:grid-cols-3">
-            {packages.slice(0, 6).map((healthPackage) => (
-              <PackageCard key={healthPackage.slug} healthPackage={healthPackage} />
-            ))}
-          </div>
-        </div>
-      </section>
-
+      {/* ── Home sample collection ───────────────────────────── */}
       <section className="section-pad bg-[linear-gradient(135deg,#061A33_0%,#0B3B75_56%,#0F766E_100%)] text-white">
         <div className="container-page grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
           <div>
-            <p className="text-sm font-semibold uppercase text-cyan-200">
+            <p className="text-sm font-semibold uppercase tracking-widest text-cyan-300">
               Home sample collection
             </p>
             <h2 className="mt-3 text-balance text-3xl font-semibold md:text-4xl">
-              Blood tests from home across Vashi and nearby Navi Mumbai areas
+              Get tested from the comfort of your home
             </h2>
-            <p className="mt-4 text-pretty leading-7 text-slate-200">
-              Ideal for senior citizens, busy professionals, families and people who prefer convenient sample collection.
+            <p className="mt-4 text-lg leading-8 text-slate-300">
+              Ideal for senior citizens, busy professionals, and families who prefer testing at home. Available across Vashi and nearby Navi Mumbai areas.
             </p>
             <div className="mt-6 flex flex-wrap gap-2">
               {siteConfig.serviceAreas.map((area) => (
-                <span key={area} className="rounded-[8px] border border-white/20 bg-white/10 px-3 py-2 text-sm text-cyan-50">
+                <span key={area} className="rounded-[8px] border border-white/20 bg-white/10 px-3 py-1.5 text-sm text-cyan-100">
                   {area}
                 </span>
               ))}
             </div>
-            <Link href="/home-sample-collection" className="btn-primary mt-7 bg-white text-[#061A33] hover:bg-cyan-50">
+            <Link href="/home-sample-collection" className="btn-primary mt-8 bg-white text-[#061A33] hover:bg-cyan-50">
               Book Home Collection
               <ArrowRight className="size-4" aria-hidden="true" />
             </Link>
           </div>
-          <div className="grid gap-4 md:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
             {[
-              ["1", "Choose test or upload prescription"],
-              ["2", "Select your preferred slot"],
-              ["3", "Sample collected and report shared digitally"],
-            ].map(([number, text]) => (
-              <div key={number} className="rounded-[8px] border border-white/18 bg-white/10 p-5 backdrop-blur">
-                <span className="flex size-10 items-center justify-center rounded-[8px] bg-white text-lg font-semibold text-[#061A33]">
-                  {number}
+              ["1", "Choose a test or share your prescription"],
+              ["2", "Select a convenient time slot"],
+              ["3", "Sample collected and reports shared digitally"],
+            ].map(([n, text]) => (
+              <div key={n} className="rounded-[8px] border border-white/15 bg-white/10 p-5 backdrop-blur">
+                <span className="flex size-10 items-center justify-center rounded-[8px] bg-white text-lg font-bold text-[#061A33]">
+                  {n}
                 </span>
-                <p className="mt-4 font-semibold leading-6">{text}</p>
+                <p className="mt-4 text-sm font-medium leading-6 text-slate-100">{text}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="section-pad bg-white">
+      {/* ── Medical leadership teaser ────────────────────────── */}
+      <section className="section-pad bg-[#FAFCFD]">
         <div className="container-page">
-          <div className="card-premium p-6 md:p-8">
-            <FileUp className="size-10 text-teal-700" aria-hidden="true" />
-            <h2 className="mt-4 text-3xl font-semibold text-slate-950">
-              Not sure which tests are written on your prescription?
+          <div className="mb-12 text-center">
+            <p className="text-sm font-semibold uppercase tracking-widest text-teal-700">Medical Leadership</p>
+            <h2 className="mt-3 text-3xl font-semibold text-slate-950 md:text-4xl">
+              Guided by experience and care
             </h2>
-            <p className="mt-4 leading-7 text-slate-600">
-              Upload it and our team will help you identify the required tests and guide you through booking. Simple, convenient and hassle-free.
+            <p className="mt-4 max-w-2xl mx-auto text-lg text-slate-500">
+              Nova Diagnostics is shaped by medical leadership committed to diagnostic accuracy and patient-centred care.
             </p>
-            <Link href="/upload-prescription" className="btn-primary mt-6">
-              Upload Prescription
+          </div>
+          <div className="grid gap-6 sm:grid-cols-2 max-w-2xl mx-auto">
+            {siteConfig.doctors.map((doctor) => (
+              <DoctorTeaser key={doctor.name} doctor={doctor} />
+            ))}
+          </div>
+          <div className="mt-10 text-center">
+            <Link href="/about#medical-leadership" className="btn-secondary">
+              Meet our doctors
               <ArrowRight className="size-4" aria-hidden="true" />
             </Link>
           </div>
         </div>
       </section>
 
-      <section className="section-pad">
+      {/* ── Location and contact ─────────────────────────────── */}
+      <section className="section-pad bg-white">
         <div className="container-page">
-          <SectionHeading
-            eyebrow="Why Nova Diagnostics"
-            title="Care, clarity and convenience in one local lab"
-            description="Experienced support, convenient location, home collection and clear test guidance for families in Vashi and nearby Navi Mumbai areas."
-            align="center"
-          />
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {whyCards.map((card) => (
-              <TrustBadge key={card.label} {...card} />
-            ))}
+          <div className="mb-10">
+            <p className="text-sm font-semibold uppercase tracking-widest text-teal-700">Location</p>
+            <h2 className="mt-3 text-3xl font-semibold text-slate-950 md:text-4xl">
+              Visit us in Vashi
+            </h2>
           </div>
-        </div>
-      </section>
-
-      <MedicalLeadership preview />
-
-      <section className="section-pad">
-        <div className="container-page">
-          <SectionHeading
-            eyebrow="Location and contact"
-            title="Visit Nova Diagnostics in Vashi"
-            description="The lab address is listed clearly for walk-ins, directions and home collection coordination."
-          />
-          <div className="mt-8 grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">
+          <div className="grid gap-6 lg:grid-cols-[1.4fr_0.6fr]">
             <MapBlock />
             <div className="grid gap-6">
               <ReviewCTA />
               <div className="card-premium p-6">
-                <Timer className="size-9 text-teal-700" aria-hidden="true" />
-                <h3 className="mt-4 text-xl font-semibold text-slate-950">Timings</h3>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
+                <Timer className="size-8 text-teal-700" aria-hidden="true" />
+                <h3 className="mt-4 text-lg font-semibold text-slate-950">Timings</h3>
+                <p className="mt-2 text-sm leading-6 text-slate-500">
                   {siteConfig.timings && !siteConfig.timings.startsWith("[")
                     ? siteConfig.timings
                     : "Please call or WhatsApp for current lab timings."}
@@ -287,18 +307,65 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="section-pad bg-white">
-        <div className="container-page grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
-          <SectionHeading
-            eyebrow="FAQ"
-            title="Common questions before booking"
-            description="Helpful answers for patients planning a lab visit, home collection or prescription upload."
-          />
+      {/* ── FAQ ──────────────────────────────────────────────── */}
+      <section className="section-pad bg-[#FAFCFD]">
+        <div className="container-page grid gap-10 lg:grid-cols-[0.75fr_1.25fr] lg:items-start">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-widest text-teal-700">FAQ</p>
+            <h2 className="mt-3 text-3xl font-semibold text-slate-950">
+              Common questions
+            </h2>
+            <p className="mt-4 leading-7 text-slate-500">
+              Answers to what patients most commonly ask before booking.
+            </p>
+            <Link href="/contact" className="btn-primary mt-7">
+              <CalendarCheck className="size-4" aria-hidden="true" />
+              Book a test
+            </Link>
+          </div>
           <FAQAccordion items={homeFaqs} />
         </div>
       </section>
 
       <CTASection />
     </>
+  );
+}
+
+/* Compact doctor teaser for homepage only */
+function DoctorTeaser({ doctor }: { doctor: typeof siteConfig.doctors[0] }) {
+  const initials = doctor.name
+    .replace(/^Dr\.\s*/i, "")
+    .split(" ")
+    .map((p) => p[0])
+    .join("")
+    .slice(0, 2);
+
+  return (
+    <div className="card-premium flex items-center gap-5 p-5">
+      <div className="relative size-20 shrink-0 overflow-hidden rounded-[8px] bg-gradient-to-br from-slate-100 to-cyan-50">
+        {doctor.imageAvailable !== false ? (
+          <Image
+            src={doctor.image}
+            alt={doctor.name}
+            fill
+            sizes="80px"
+            className="object-cover object-top"
+            unoptimized
+          />
+        ) : (
+          <span className="flex size-full items-center justify-center text-lg font-bold text-[#061A33]">
+            {initials}
+          </span>
+        )}
+      </div>
+      <div>
+        <p className="font-semibold text-slate-950">{doctor.name}</p>
+        {doctor.degree && !doctor.degree.startsWith("[") ? (
+          <p className="mt-0.5 text-sm text-teal-700">{doctor.degree}</p>
+        ) : null}
+        <p className="mt-1 text-xs leading-5 text-slate-500">Medical Leadership, Nova Diagnostics</p>
+      </div>
+    </div>
   );
 }

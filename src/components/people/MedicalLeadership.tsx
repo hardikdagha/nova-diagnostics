@@ -4,7 +4,7 @@ import { siteConfig } from "@/config/site";
 
 export function MedicalLeadership({ preview = false }: { preview?: boolean }) {
   return (
-    <section className="section-pad bg-white">
+    <section id="medical-leadership" className="section-pad bg-white">
       <div className="container-page">
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <SectionHeading

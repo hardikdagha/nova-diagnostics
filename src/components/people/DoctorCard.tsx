@@ -22,7 +22,7 @@ export function DoctorCard({ doctor }: DoctorCardProps) {
 
   return (
     <article className="card-premium overflow-hidden">
-      <div className="relative min-h-72 bg-gradient-to-br from-slate-100 via-cyan-50 to-white">
+      <div className="relative aspect-[3/4] bg-gradient-to-br from-slate-100 via-cyan-50 to-white">
         {showImage ? (
           <Image
             src={doctor.image}

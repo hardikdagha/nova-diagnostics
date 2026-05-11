@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 
 type BrandLogoProps = {
@@ -8,70 +7,74 @@ type BrandLogoProps = {
   className?: string;
 };
 
-const logoStyles = {
-  header: {
-    wrapper: "w-[158px] sm:w-[190px]",
-    wordmark: "h-8 sm:h-9",
-    diagnostics: "text-[11px] sm:text-[13px]",
-    tagline: "hidden text-[8px] sm:flex",
-    sizes: "(min-width: 640px) 190px, 158px",
-  },
-  footer: {
-    wrapper: "w-[235px]",
-    wordmark: "h-12",
-    diagnostics: "text-lg",
-    tagline: "flex text-xs",
-    sizes: "235px",
-  },
-  feature: {
-    wrapper: "w-[300px] max-w-full sm:w-[360px]",
-    wordmark: "h-16 sm:h-20",
-    diagnostics: "text-2xl sm:text-3xl",
-    tagline: "flex text-sm sm:text-base",
-    sizes: "(min-width: 640px) 360px, 300px",
-  },
-};
-
 export function BrandLogo({ variant = "header", className }: BrandLogoProps) {
-  const style = logoStyles[variant];
+  if (variant === "header") {
+    const logo = (
+      <span
+        className={cn("inline-flex flex-col items-start", className)}
+        role="img"
+        aria-label="Nova Diagnostics logo"
+      >
+        <span className="relative block h-8 w-[130px] sm:h-9 sm:w-[158px]">
+          <Image
+            src="/images/nova-logo.jpg"
+            alt="NOVA"
+            fill
+            sizes="(min-width: 640px) 158px, 130px"
+            className="object-contain object-left"
+            priority
+            unoptimized
+          />
+        </span>
+        <span
+          aria-hidden="true"
+          className="mt-0.5 block font-semibold uppercase leading-none tracking-[0.32em] text-slate-600 text-[10px] sm:text-[11px]"
+        >
+          Diagnostics
+        </span>
+        <span
+          aria-hidden="true"
+          className="hidden sm:flex mt-1 items-center gap-1.5 leading-none text-slate-400 text-[8px]"
+        >
+          <span className="h-px w-5 bg-slate-300" />
+          Committed to Care!
+          <span className="h-px w-5 bg-slate-300" />
+        </span>
+      </span>
+    );
+
+    return (
+      <Link href="/" aria-label="Nova Diagnostics home" className="inline-flex">
+        {logo}
+      </Link>
+    );
+  }
+
+  /* footer and feature — use the full stacked logo PNG */
+  const sizes =
+    variant === "feature"
+      ? "(min-width: 640px) 260px, 220px"
+      : "200px";
+  const boxSize =
+    variant === "feature"
+      ? "w-[220px] sm:w-[260px]"
+      : "w-[200px]";
 
   const logo = (
     <span
-      className={cn("inline-flex flex-col items-start", style.wrapper, className)}
+      className={cn("inline-block", boxSize, className)}
       role="img"
-      aria-label="Nova Diagnostics logo"
+      aria-label="Nova Diagnostics – Committed to Care!"
     >
-      <span className={cn("relative block w-full overflow-hidden", style.wordmark)}>
-        <Image
-          src={siteConfig.logoImage}
-          alt="Nova Diagnostics logo"
-          fill
-          sizes={style.sizes}
-          className="object-contain object-left"
-          priority={variant === "header"}
-          unoptimized
-        />
-      </span>
-      <span
-        aria-hidden="true"
-        className={cn(
-          "mt-0.5 block w-full font-medium uppercase leading-none text-[#655963] tracking-[0.34em]",
-          style.diagnostics,
-        )}
-      >
-        Diagnostics
-      </span>
-      <span
-        aria-hidden="true"
-        className={cn(
-          "mt-1 items-center gap-2 font-medium leading-none text-[#655963]",
-          style.tagline,
-        )}
-      >
-        <span className="h-px w-8 bg-[#655963]/35" />
-        {siteConfig.tagline}
-        <span className="h-px w-8 bg-[#655963]/35" />
-      </span>
+      <Image
+        src="/images/nova-logo-full.png"
+        alt="Nova Diagnostics – Committed to Care!"
+        width={2000}
+        height={2000}
+        sizes={sizes}
+        className="w-full object-contain"
+        unoptimized
+      />
     </span>
   );
 

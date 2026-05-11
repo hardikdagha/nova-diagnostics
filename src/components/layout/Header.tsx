@@ -45,12 +45,7 @@ export function Header() {
         </div>
       </div>
       <div className="container-page flex min-h-20 items-center justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <BrandLogo variant="header" />
-          <span className="ml-1 hidden text-xs font-medium text-slate-500 sm:block">
-            {siteConfig.area}, {siteConfig.city}
-          </span>
-        </div>
+        <BrandLogo variant="header" />
 
         <nav className="hidden items-center gap-1 lg:flex" aria-label="Main navigation">
           {navigation.map((item) => {

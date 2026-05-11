@@ -8,100 +8,111 @@ import {
   Home,
   MapPinned,
   MessageCircle,
-  Search,
   ShieldCheck,
 } from "lucide-react";
-import { BrandLogo } from "@/components/ui/BrandLogo";
 import { siteConfig } from "@/config/site";
 import { getDirectionsUrl, getWhatsappUrl } from "@/lib/utils";
 
-const heroBadges = [
-  { label: "Home sample collection available", icon: Home },
-  { label: "Digital reports", icon: FileText },
-  { label: "Located in Vashi, Navi Mumbai", icon: MapPinned },
-  { label: "Prescription support", icon: ClipboardCheck },
-  { label: "Clear communication", icon: ShieldCheck },
+const trustBadges = [
+  { icon: Home, text: "Home sample collection" },
+  { icon: FileText, text: "Digital reports" },
+  { icon: MapPinned, text: "Vashi, Navi Mumbai" },
+  { icon: ClipboardCheck, text: "Prescription support" },
+  { icon: ShieldCheck, text: "Clear communication" },
 ];
 
 export function HeroSection() {
   return (
-    <section className="relative overflow-hidden bg-[linear-gradient(135deg,#FFFEFB_0%,#EAF8F9_48%,#FFFFFF_100%)]">
-      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-[#D83A31]/25 via-[#00A6A6]/45 to-[#4C9A3A]/25" aria-hidden="true" />
-      <div className="container-page relative grid min-w-0 gap-12 py-12 md:py-16 lg:grid-cols-[1fr_0.95fr] lg:items-center lg:py-20">
+    <section className="relative overflow-hidden bg-white">
+      {/* Subtle top accent line matching logo colors */}
+      <div
+        className="absolute inset-x-0 top-0 h-1"
+        style={{ background: "linear-gradient(90deg,#D83A31 0%,#E8A020 25%,#4C9A3A 50%,#2E8BAD 75%,#D83A31 100%)" }}
+        aria-hidden="true"
+      />
+
+      <div className="container-page grid min-w-0 gap-10 py-16 md:py-20 lg:grid-cols-2 lg:items-center lg:py-24 xl:gap-16">
+
+        {/* Left — editorial text block */}
         <div className="min-w-0 animate-fade-up">
-          <div className="mb-7 rounded-[8px] border border-white bg-white/75 p-4 shadow-sm shadow-slate-200/70 backdrop-blur sm:w-fit">
-            <BrandLogo variant="feature" />
+          <div className="inline-flex items-center gap-2 rounded-full border border-cyan-200 bg-cyan-50 px-4 py-1.5">
+            <span className="size-2 rounded-full bg-teal-500" aria-hidden="true" />
+            <span className="text-sm font-semibold text-teal-800">{siteConfig.tagline}</span>
           </div>
-          <p className="inline-flex rounded-[8px] border border-cyan-200 bg-white/80 px-3 py-1 text-sm font-semibold text-teal-800 shadow-sm shadow-slate-200/70">
-            {siteConfig.tagline}
-          </p>
-          <h1 className="mt-5 max-w-4xl break-words text-4xl font-semibold leading-tight text-slate-950 md:text-6xl">
-            Diagnostics You Can Trust. Care You Can Feel.
+
+          <h1 className="mt-6 text-[2.6rem] font-bold leading-[1.15] tracking-tight text-slate-950 md:text-5xl lg:text-[3.25rem]">
+            Diagnostics you can trust.<br />
+            <span className="text-[#0F766E]">Care you can feel.</span>
           </h1>
-          <p className="mt-5 max-w-2xl text-pretty text-lg leading-8 text-slate-600">
-            Nova Diagnostics offers blood tests, health checkups, home sample collection, and digital reports for families in Vashi and nearby Navi Mumbai areas.
+
+          <p className="mt-6 max-w-lg text-lg leading-8 text-slate-500">
+            Blood tests, health checkups, home sample collection and digital reports for families in Vashi and nearby Navi Mumbai areas.
           </p>
 
-          <div className="mt-7 grid gap-3 sm:flex sm:flex-wrap">
-            <Link href="/contact" className="btn-primary">
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link href="/contact" className="btn-primary gap-2.5 px-6 py-3.5 text-[15px]">
               <CalendarCheck className="size-4" aria-hidden="true" />
               Book a Test
             </Link>
-            <a href={getWhatsappUrl()} className="btn-secondary">
+            <a href={getWhatsappUrl()} className="btn-secondary gap-2.5 px-6 py-3.5 text-[15px]">
               <MessageCircle className="size-4" aria-hidden="true" />
-              WhatsApp Now
+              WhatsApp Us
             </a>
-            <a href={getDirectionsUrl()} target="_blank" className="btn-secondary">
+            <a href={getDirectionsUrl()} target="_blank" className="btn-secondary gap-2.5 px-6 py-3.5 text-[15px]">
               <MapPinned className="size-4" aria-hidden="true" />
               Get Directions
             </a>
           </div>
 
-          <div className="mt-8 grid gap-3 sm:grid-cols-2">
-            {heroBadges.map((badge) => {
-              const Icon = badge.icon;
-
+          <div className="mt-8 flex flex-wrap gap-2.5">
+            {trustBadges.map((b) => {
+              const Icon = b.icon;
               return (
-                <div key={badge.label} className="flex items-center gap-3 rounded-[8px] border border-white/90 bg-white/80 p-3 shadow-sm shadow-slate-200/70 backdrop-blur">
-                  <span className="flex size-10 items-center justify-center rounded-[8px] bg-cyan-50 text-teal-700">
-                    <Icon className="size-5" aria-hidden="true" />
-                  </span>
-                  <span className="text-sm font-semibold text-slate-800">{badge.label}</span>
+                <div key={b.text} className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3.5 py-2 shadow-sm">
+                  <Icon className="size-3.5 shrink-0 text-teal-700" aria-hidden="true" />
+                  <span className="text-xs font-semibold text-slate-700">{b.text}</span>
                 </div>
               );
             })}
           </div>
         </div>
 
+        {/* Right — lab image */}
         <div className="min-w-0 animate-fade-up animation-delay-150">
-          <div className="relative overflow-hidden rounded-[8px] border border-white/70 bg-white shadow-2xl shadow-slate-900/12">
-            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#D83A31] via-[#00A6A6] to-[#4C9A3A]" aria-hidden="true" />
-            <div className="relative aspect-[4/3] min-h-[380px]">
+          <div className="relative overflow-hidden rounded-2xl shadow-2xl shadow-slate-900/15">
+            {/* Logo-colour accent bar */}
+            <div
+              className="absolute inset-x-0 top-0 z-10 h-1.5"
+              style={{ background: "linear-gradient(90deg,#D83A31,#E8A020,#4C9A3A,#2E8BAD)" }}
+              aria-hidden="true"
+            />
+            <div className="relative aspect-[16/11]">
               <Image
                 src="/images/nova-lab-hero.jpg"
-                alt="Modern diagnostic laboratory interior"
+                alt="Nova Diagnostics laboratory in Vashi, Navi Mumbai"
                 fill
                 priority
                 unoptimized
-                sizes="(min-width: 1024px) 48vw, 100vw"
+                sizes="(min-width: 1024px) 50vw, 100vw"
                 className="object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#061A33]/78 via-[#061A33]/10 to-transparent" />
+              {/* Bottom overlay with a quick CTA */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#061A33]/80 via-[#061A33]/10 to-transparent" />
             </div>
-            <div className="absolute inset-x-4 bottom-4 rounded-[8px] border border-white/35 bg-white/94 p-4 shadow-xl shadow-slate-900/18 backdrop-blur md:inset-x-6 md:bottom-6 md:p-5">
-              <div className="flex items-center gap-3">
-                <span className="flex size-11 items-center justify-center rounded-[8px] bg-[#061A33] text-white">
-                  <Search className="size-5" aria-hidden="true" />
-                </span>
+            <div className="absolute inset-x-5 bottom-5 rounded-xl border border-white/20 bg-white/95 p-4 backdrop-blur md:inset-x-6 md:bottom-6 md:p-5">
+              <div className="flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-sm font-semibold text-slate-950">Find your test quickly</p>
-                  <p className="text-xs text-slate-500">CBC, Thyroid, HbA1c, Vitamin D, Fever Panel</p>
+                  <p className="font-semibold text-slate-950">Nova Diagnostics</p>
+                  <p className="mt-0.5 text-sm text-slate-500">Juhu Nagar, Sector 10, Vashi · Navi Mumbai</p>
                 </div>
+                <Link
+                  href="/tests"
+                  className="flex shrink-0 items-center gap-2 rounded-lg bg-[#061A33] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0b3b75]"
+                >
+                  Find a test
+                  <ArrowRight className="size-3.5" aria-hidden="true" />
+                </Link>
               </div>
-              <Link href="/tests" className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-[8px] bg-cyan-50 px-4 py-3 text-sm font-semibold text-teal-800 transition hover:bg-cyan-100">
-                Browse test catalogue
-                <ArrowRight className="size-4" aria-hidden="true" />
-              </Link>
             </div>
           </div>
         </div>

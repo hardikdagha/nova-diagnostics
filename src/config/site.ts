@@ -18,7 +18,7 @@ export const siteConfig = {
   phone: "+918433706778",
   displayPhone: "+91 8433706778",
   whatsappNumber: "918433706778",
-  email: "[ADD EMAIL]",
+  email: "nova.vashi@gmail.com",
   address:
     "Sungrace CHS, 1st Floor, F1/C2, above Ribbons and Balloons Cake Shop, Juhu Nagar, Sector 10, Vashi, Navi Mumbai - 400703, Maharashtra, India",
   city: "Navi Mumbai",
