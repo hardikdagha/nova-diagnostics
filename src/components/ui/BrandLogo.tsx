@@ -54,11 +54,11 @@ export function BrandLogo({ variant = "header", className }: BrandLogoProps) {
   const sizes =
     variant === "feature"
       ? "(min-width: 640px) 260px, 220px"
-      : "120px";
+      : "160px";
   const boxSize =
     variant === "feature"
       ? "w-[220px] sm:w-[260px]"
-      : "w-[120px]";
+      : "w-[160px]";
 
   const logo = (
     <span
@@ -67,7 +67,7 @@ export function BrandLogo({ variant = "header", className }: BrandLogoProps) {
       aria-label="Nova Diagnostics – Committed to Care!"
     >
       <Image
-        src="/images/nova-logo-full.png"
+        src="/images/nova-logo-cropped.png"
         alt="Nova Diagnostics – Committed to Care!"
         width={2000}
         height={2000}
