@@ -54,11 +54,11 @@ export function BrandLogo({ variant = "header", className }: BrandLogoProps) {
   const sizes =
     variant === "feature"
       ? "(min-width: 640px) 260px, 220px"
-      : "200px";
+      : "120px";
   const boxSize =
     variant === "feature"
       ? "w-[220px] sm:w-[260px]"
-      : "w-[200px]";
+      : "w-[120px]";
 
   const logo = (
     <span

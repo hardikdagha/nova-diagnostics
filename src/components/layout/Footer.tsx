@@ -23,7 +23,7 @@ export function Footer() {
       <div className="container-page py-12 md:py-16">
         <div className="grid gap-10 lg:grid-cols-[1.25fr_0.75fr_0.85fr_1.05fr]">
           <div>
-            <div className="w-fit rounded-xl bg-white p-4">
+            <div className="w-fit rounded-xl bg-white p-3">
               <BrandLogo variant="footer" />
             </div>
             <p className="mt-5 max-w-sm text-sm leading-7 text-slate-300">
