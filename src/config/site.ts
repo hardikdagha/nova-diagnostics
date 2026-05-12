@@ -13,12 +13,12 @@ export const siteConfig = {
   tagline: "Committed to Care!",
   description:
     "Book blood tests, health packages, prescription support and home sample collection with Nova Diagnostics in Vashi, Navi Mumbai.",
-  url: "https://www.novadiagnostics.in",
+  url: "https://www.novadiagnosticslab.com",
   logoImage: "/images/nova-logo.jpg",
   phone: "+918433706778",
   displayPhone: "+91 8433706778",
   whatsappNumber: "918433706778",
-  email: "nova.vashi@gmail.com",
+  email: "contact@novadiagnosticslab.com",
   address:
     "Sungrace CHS, 1st Floor, F1/C2, above Ribbons and Balloons Cake Shop, Juhu Nagar, Sector 10, Vashi, Navi Mumbai - 400703, Maharashtra, India",
   city: "Navi Mumbai",
