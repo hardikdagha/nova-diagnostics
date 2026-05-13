@@ -99,7 +99,16 @@ export default function PatientDashboardPage() {
       );
       const json = await res.json();
       if (json.signedUrl) {
-        window.open(json.signedUrl, "_blank");
+        // window.open() after an await is treated as a popup and blocked on
+        // mobile browsers (Safari / Chrome). Creating an anchor and clicking
+        // it is always treated as a direct user gesture and works on all devices.
+        const a = document.createElement("a");
+        a.href = json.signedUrl;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
       } else {
         setDownloadError("Could not generate download link. Please contact Nova Diagnostics.");
       }

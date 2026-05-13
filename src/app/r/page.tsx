@@ -122,7 +122,14 @@ export default function ReportPage() {
       );
       const json = await res.json();
       if (json.signedUrl) {
-        window.open(json.signedUrl, "_blank");
+        // Use anchor click instead of window.open to avoid popup blocking on mobile
+        const a = document.createElement("a");
+        a.href = json.signedUrl;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
         // Re-verify to refresh state after download
         const meta = await fetch(`${SUPABASE_URL}/functions/v1/verify-report-token`, {
           method: "POST",

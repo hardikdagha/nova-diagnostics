@@ -91,7 +91,7 @@ const services = [
 
 const whyPoints = [
   { icon: ShieldCheck, label: "Careful processes", text: "Sample handling, reporting and communication done methodically." },
-  { icon: MapPinned, label: "Accessible location", text: "Conveniently located in Juhu Nagar, Sector 10, Vashi." },
+  { icon: MapPinned, label: "Accessible location", text: "Conveniently located in Sector-14, Vashi." },
   { icon: HeartHandshake, label: "Patient-first care", text: "Warm, attentive support for patients and families." },
   { icon: Sparkles, label: "Clean environment", text: "A calm, hygienic space designed for patient comfort." },
 ];

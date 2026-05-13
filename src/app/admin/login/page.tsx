@@ -109,7 +109,7 @@ export default function AdminLoginPage() {
         </form>
 
         <p className="mt-6 text-center text-xs text-slate-400">
-          For access, contact Dr. Chandresh Dagha
+          For access, contact Chandresh Dagha
         </p>
       </div>
     </div>
