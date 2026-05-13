@@ -17,6 +17,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const [checking, setChecking] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [staffEmail, setStaffEmail] = useState<string | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -37,6 +38,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         router.replace("/admin/login");
         return;
       }
+      setStaffEmail(session.user.email ?? null);
       setChecking(false);
     });
   }, [router]);
@@ -76,13 +78,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               Staff Portal
             </span>
           </div>
-          <button
-            onClick={handleSignOut}
-            className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100"
-          >
-            <LogOut className="size-4" />
-            <span className="hidden sm:inline">Sign out</span>
-          </button>
+          <div className="flex items-center gap-3">
+            {staffEmail && (
+              <span className="hidden text-xs text-slate-500 sm:inline">{staffEmail}</span>
+            )}
+            <button
+              onClick={handleSignOut}
+              className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100"
+            >
+              <LogOut className="size-4" />
+              <span className="hidden sm:inline">Sign out</span>
+            </button>
+          </div>
         </div>
         {/* Mobile nav */}
         {menuOpen && (

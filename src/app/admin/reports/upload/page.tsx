@@ -45,6 +45,7 @@ export default function UploadReportPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<{
+    reportId: string;
     reportNumber: string;
     token: string;
     whatsappMessage: string;
@@ -96,8 +97,8 @@ export default function UploadReportPage() {
         patientId = newPatient?.id ?? null;
       }
 
-      // Insert report
-      const { error: insertError } = await supabase.from("reports").insert({
+      // Insert report — select id so we can link to the detail page
+      const { data: inserted, error: insertError } = await supabase.from("reports").insert({
         report_number: reportNumber,
         patient_id: patientId,
         patient_name: form.patientName,
@@ -109,7 +110,7 @@ export default function UploadReportPage() {
         token_hash: tokenHash,
         status: "ready",
         uploaded_by: session.user.id,
-      });
+      }).select("id").single();
 
       if (insertError) {
         // Clean up uploaded file on insert failure
@@ -120,7 +121,7 @@ export default function UploadReportPage() {
       const reportUrl = `https://novadiagnosticslab.com/r/${token}`;
       const whatsappMessage = `Hello ${form.patientName}, your report from Nova Diagnostics is ready.\n\nReport No: ${reportNumber}\n\nDownload report:\n${reportUrl}\n\nNova Diagnostics\n+91 8433706778`;
 
-      setResult({ reportNumber, token, whatsappMessage });
+      setResult({ reportId: inserted?.id ?? "", reportNumber, token, whatsappMessage });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
     } finally {
@@ -173,9 +174,11 @@ export default function UploadReportPage() {
           >
             Upload another
           </button>
-          <button onClick={() => router.push("/admin/reports")} className="btn-primary flex-1 text-sm">
-            View all reports
-          </button>
+          {result?.reportId && (
+            <button onClick={() => router.push(`/admin/reports?id=${result.reportId}`)} className="btn-primary flex-1 text-sm">
+              View Report
+            </button>
+          )}
         </div>
       </div>
     );
