@@ -26,9 +26,9 @@ export function MapBlock({ compact = false }: { compact?: boolean }) {
       </div>
       <div className="map-grid flex min-h-64 items-center justify-center border-y border-slate-200 bg-cyan-50/70 p-6 text-center">
         <div>
-          <p className="font-semibold text-slate-950">Juhu Nagar, Sector 10, Vashi</p>
+          <p className="font-semibold text-slate-950">Daffodils CHS, Sector-14, Vashi</p>
           <p className="mt-2 max-w-md text-sm leading-6 text-slate-600">
-            Sungrace CHS, 1st Floor, F1/C2, above Ribbons and Balloons Cake Shop, Navi Mumbai — 400703
+            Shop No. 27, Plot No 1-1 &amp; 1-2, Sector-14, Vashi, Navi Mumbai — 400703
           </p>
         </div>
       </div>

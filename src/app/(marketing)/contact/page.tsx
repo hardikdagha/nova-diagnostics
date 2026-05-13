@@ -151,7 +151,7 @@ export default function ContactPage() {
           <SectionHeading
             eyebrow="Directions"
             title="Visit the lab in Vashi"
-            description="Find Nova Diagnostics at Sungrace CHS, 1st Floor, Juhu Nagar, Sector 10, Vashi. Use the button below for turn-by-turn directions."
+            description="Find Nova Diagnostics at Shop No. 27, Daffodils CHS, Sector-14, Vashi. Use the button below for turn-by-turn directions."
           />
           <MapBlock />
         </div>

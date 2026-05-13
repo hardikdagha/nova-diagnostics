@@ -103,7 +103,7 @@ export function HeroSection() {
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <p className="font-semibold text-slate-950">Nova Diagnostics</p>
-                  <p className="mt-0.5 text-sm text-slate-500">Juhu Nagar, Sector 10, Vashi · Navi Mumbai</p>
+                  <p className="mt-0.5 text-sm text-slate-500">Daffodils CHS, Sector-14, Vashi · Navi Mumbai</p>
                 </div>
                 <Link
                   href="/tests"

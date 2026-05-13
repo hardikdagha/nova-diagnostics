@@ -20,7 +20,7 @@ export const siteConfig = {
   whatsappNumber: "918433706778",
   email: "contact@novadiagnosticslab.com",
   address:
-    "Sungrace CHS, 1st Floor, F1/C2, above Ribbons and Balloons Cake Shop, Juhu Nagar, Sector 10, Vashi, Navi Mumbai - 400703, Maharashtra, India",
+    "Shop No. 27, Daffodils CHS, Plot No 1-1 & 1-2, Sector-14, Vashi, Navi Mumbai - 400703, Maharashtra, India",
   city: "Navi Mumbai",
   area: "Vashi",
   state: "Maharashtra",
@@ -31,13 +31,13 @@ export const siteConfig = {
   nablStatus: "not-claimed" as "not-claimed" | "in-process" | "accredited",
   doctors: [
     {
-      name: "Dr. Chandresh Dagha",
+      name: "Chandresh Dagha",
       phone: "+918898989096",
       displayPhone: "+91 8898989096",
       degree: "MSc in Microbiology",
       image: "/images/doctors/dr-chandresh-dagha.jpg",
       imageAvailable: true,
-      bio: "Dr. Chandresh Dagha has guided Nova Diagnostics for over 34 years, bringing deep focus to diagnostic quality, careful laboratory processes and patient-centred care.",
+      bio: "Chandresh Dagha has guided Nova Diagnostics for over 34 years, bringing deep focus to diagnostic quality, careful laboratory processes and patient-centred care.",
     },
     {
       name: "Dr. Sujit Singh",
