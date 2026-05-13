@@ -129,7 +129,7 @@ export default function ReportLookupPage() {
               </form>
 
               <p className="mt-5 text-center text-sm text-slate-500">
-                Got a WhatsApp link? Use that instead — it's faster.
+                Got a WhatsApp link? Use that instead — it&apos;s faster.
               </p>
             </>
           ) : (
@@ -179,8 +179,22 @@ export default function ReportLookupPage() {
             </div>
           )}
 
+          {/* Patient login prompt */}
+          <div className="mt-4 rounded-xl border border-slate-200 bg-white p-5 text-center">
+            <p className="text-sm font-medium text-slate-700">Have a Nova Diagnostics account?</p>
+            <p className="mt-1 text-xs text-slate-500">
+              Login to view all reports linked to your verified email address.
+            </p>
+            <Link
+              href="/patient/login"
+              className="btn-primary mt-3 inline-flex justify-center text-sm"
+            >
+              Login to My Reports
+            </Link>
+          </div>
+
           {/* Help */}
-          <div className="mt-6 text-center">
+          <div className="mt-4 text-center">
             <p className="mb-2 text-xs text-slate-400">Need help?</p>
             <div className="flex justify-center gap-3">
               <a href="tel:+918433706778" className="btn-secondary text-sm">

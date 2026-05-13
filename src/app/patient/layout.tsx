@@ -1,11 +1,16 @@
 import Link from "next/link";
 import Image from "next/image";
 
+/**
+ * Patient portal layout.
+ * Minimal header: logo + "My Reports" label.
+ * No marketing chrome (no footer, no sticky CTA).
+ */
 export default function PatientLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="border-b border-slate-200 bg-white">
-        <div className="flex h-14 items-center px-4">
+        <div className="flex h-14 items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2">
             <Image
               src="/images/nova-logo-cropped.png"
@@ -16,6 +21,9 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
               unoptimized
             />
           </Link>
+          <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">
+            My Reports
+          </span>
         </div>
       </header>
       <main>{children}</main>

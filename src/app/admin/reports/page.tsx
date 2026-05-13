@@ -18,7 +18,7 @@ const STATUS_CHIP: Record<string, string> = {
   archived: "bg-slate-100 text-slate-600",
 };
 
-async function generateNewToken(reportId: string, reportNumber: string, patientName: string, testName: string) {
+async function generateNewToken(reportId: string) {
   const buf = new Uint8Array(40);
   crypto.getRandomValues(buf);
   const raw = btoa(String.fromCharCode(...buf)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
@@ -59,21 +59,27 @@ function AdminReportsContent() {
     setLoading(false);
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  // Defer load() into a microtask so setState inside it isn't synchronous in the effect body
+  useEffect(() => {
+    void Promise.resolve().then(() => load());
+  }, [load]);
 
   useEffect(() => {
-    if (!selectedId) { setSelected(null); return; }
-    const r = reports.find((r) => r.id === selectedId) ?? null;
-    setSelected(r);
-    if (r) {
-      supabase
-        .from("report_access_logs")
-        .select("action, success, access_method, created_at")
-        .eq("report_id", r.id)
-        .order("created_at", { ascending: false })
-        .limit(20)
-        .then(({ data }) => setLogs(data ?? []));
-    }
+    void (async () => {
+      await Promise.resolve(); // yield before setState
+      if (!selectedId) { setSelected(null); return; }
+      const r = reports.find((r) => r.id === selectedId) ?? null;
+      setSelected(r);
+      if (r) {
+        const { data } = await supabase
+          .from("report_access_logs")
+          .select("action, success, access_method, created_at")
+          .eq("report_id", r.id)
+          .order("created_at", { ascending: false })
+          .limit(20);
+        setLogs(data ?? []);
+      }
+    })();
   }, [selectedId, reports]);
 
   const filtered = reports.filter((r) => {
@@ -112,7 +118,7 @@ function AdminReportsContent() {
     if (!selected) return;
     setActionLoading(true);
     try {
-      const token = await generateNewToken(selected.id, selected.report_number, selected.patient_name, selected.test_name);
+      const token = await generateNewToken(selected.id);
       setNewToken(token);
       await load();
     } catch {

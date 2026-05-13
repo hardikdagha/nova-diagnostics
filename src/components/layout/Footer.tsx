@@ -11,6 +11,7 @@ const quickLinks = [
   ["Health Packages", "/packages"],
   ["Home Sample Collection", "/home-sample-collection"],
   ["Upload Prescription", "/upload-prescription"],
+  ["My Reports", "/patient/dashboard"],
   ["About", "/about"],
   ["Contact", "/contact"],
   ["Privacy Policy", "/privacy-policy"],

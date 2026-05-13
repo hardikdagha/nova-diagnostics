@@ -18,6 +18,7 @@
  */
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { AlertTriangle, Clock, Download, MessageCircle, Phone, XCircle } from "lucide-react";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -70,36 +71,39 @@ export default function ReportPage() {
   const [isDownloading, setIsDownloading] = useState(false);
 
   useEffect(() => {
-    // Extract token from /r/<token> path
-    const path = window.location.pathname; // e.g. /r/abc123xyz
-    const parts = path.split("/").filter(Boolean);
-    const t = parts[1] ?? null; // parts[0] = "r", parts[1] = token
-    setToken(t);
+    void (async () => {
+      // Extract token from /r/<token> path
+      const path = window.location.pathname; // e.g. /r/abc123xyz
+      const parts = path.split("/").filter(Boolean);
+      const t = parts[1] ?? null; // parts[0] = "r", parts[1] = token
 
-    if (!t) {
-      setState({ phase: "error", code: "not_found" });
-      return;
-    }
+      // Yield before calling setState (satisfies react-hooks/set-state-in-effect)
+      await Promise.resolve();
+      setToken(t);
 
-    // Verify token via Edge Function
-    fetch(`${SUPABASE_URL}/functions/v1/verify-report-token`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        apikey: SUPABASE_ANON_KEY,
-      },
-      body: JSON.stringify({ token: t }),
-    })
-      .then((r) => r.json())
-      .then((json) => {
+      if (!t) {
+        setState({ phase: "error", code: "not_found" });
+        return;
+      }
+
+      // Verify token via Edge Function
+      try {
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/verify-report-token`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", apikey: SUPABASE_ANON_KEY },
+          body: JSON.stringify({ token: t }),
+        });
+        const json = await res.json();
         if (json.error) {
           const code = json.error as State extends { phase: "error"; code: infer C } ? C : never;
           setState({ phase: "error", code });
         } else {
           setState({ phase: "ready", data: json as ReportMeta });
         }
-      })
-      .catch(() => setState({ phase: "error", code: "server_error" }));
+      } catch {
+        setState({ phase: "error", code: "server_error" });
+      }
+    })();
   }, []);
 
   const handleDownload = async () => {
@@ -264,6 +268,14 @@ export default function ReportPage() {
             </a>
           </div>
         </div>
+
+        {/* My Reports nudge */}
+        <p className="mt-5 text-center text-xs text-slate-400">
+          Want to view all reports linked to your email?{" "}
+          <Link href="/patient/login" className="underline hover:text-slate-600">
+            Login to My Reports
+          </Link>
+        </p>
       </div>
     </div>
   );

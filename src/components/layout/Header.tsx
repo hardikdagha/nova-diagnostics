@@ -16,12 +16,12 @@ import { siteConfig } from "@/config/site";
 import { cn, getCallUrl, getWhatsappUrl } from "@/lib/utils";
 
 const navigation = [
-  { label: "Home", href: "/" },
   { label: "Tests", href: "/tests" },
   { label: "Packages", href: "/packages" },
   { label: "Home Collection", href: "/home-sample-collection" },
   { label: "Upload Prescription", href: "/upload-prescription" },
   { label: "About", href: "/about" },
+  { label: "My Reports", href: "/patient/dashboard" },
   { label: "Contact", href: "/contact" },
 ];
 
