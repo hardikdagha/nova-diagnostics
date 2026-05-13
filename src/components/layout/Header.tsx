@@ -4,17 +4,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import {
-  CalendarCheck,
   MapPin,
   Menu,
-  MessageCircle,
   Phone,
   User,
   X,
 } from "lucide-react";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { siteConfig } from "@/config/site";
-import { cn, getCallUrl, getWhatsappUrl } from "@/lib/utils";
+import { cn, getCallUrl } from "@/lib/utils";
 import { supabase } from "@/lib/supabase/client";
 
 /** Marketing navigation — same 6 items as before, no patient-portal link here */
@@ -92,27 +90,17 @@ export function Header() {
           })}
         </nav>
 
-        {/* Desktop right-side actions: Patient Login (compact) + WhatsApp + Book Test */}
-        <div className="hidden items-center gap-2 lg:flex">
-          {/* Patient portal — icon + short label, not a main CTA */}
+        {/* Desktop right-side: Patient Login only — hero has Book Test / WhatsApp */}
+        <div className="hidden items-center lg:flex">
           <Link
             href={patientHref}
             className={cn(
-              "flex items-center gap-1.5 whitespace-nowrap rounded-[8px] px-3 py-2 text-sm font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-900",
+              "flex items-center gap-1.5 whitespace-nowrap rounded-[8px] px-4 py-2 text-sm font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-900",
               isPatientRoute && "bg-slate-100 text-slate-900",
             )}
           >
             <User className="size-4" aria-hidden="true" />
             {patientLabel}
-          </Link>
-
-          <a href={getWhatsappUrl()} className="btn-secondary">
-            <MessageCircle className="size-4" aria-hidden="true" />
-            WhatsApp
-          </a>
-          <Link href="/contact" className="btn-primary">
-            <CalendarCheck className="size-4" aria-hidden="true" />
-            Book Test
           </Link>
         </div>
 
@@ -153,23 +141,8 @@ export function Header() {
               onClick={() => setIsOpen(false)}
             >
               <User className="size-4" aria-hidden="true" />
-              {isLoggedIn ? "Patient Dashboard" : "Patient Login / Register"}
+              {isLoggedIn ? "Patient Dashboard" : "Patient Login"}
             </Link>
-
-            <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              <a href={getWhatsappUrl()} className="btn-secondary justify-center">
-                <MessageCircle className="size-4" aria-hidden="true" />
-                WhatsApp
-              </a>
-              <Link
-                href="/contact"
-                className="btn-primary justify-center"
-                onClick={() => setIsOpen(false)}
-              >
-                <CalendarCheck className="size-4" aria-hidden="true" />
-                Book Test
-              </Link>
-            </div>
           </nav>
         </div>
       )}

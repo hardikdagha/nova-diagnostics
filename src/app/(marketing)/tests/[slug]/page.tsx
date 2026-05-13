@@ -96,7 +96,7 @@ export default async function TestDetailPage({ params }: PageProps) {
                 {test.category}
               </p>
               <h1 className="mt-3 text-balance text-4xl font-semibold leading-tight text-slate-950 md:text-5xl">
-                {test.name} in Vashi
+                {test.name}
               </h1>
               <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-600">
                 {test.description}

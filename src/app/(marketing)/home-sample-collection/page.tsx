@@ -77,7 +77,7 @@ export default function HomeSampleCollectionPage() {
                 Home sample collection
               </p>
               <h1 className="mt-3 text-balance text-4xl font-semibold leading-tight text-slate-950 md:text-5xl">
-                Blood Test at Home in Vashi and Nearby Navi Mumbai Areas
+                Blood Tests at Home — Vashi and Nearby Navi Mumbai
               </h1>
               <p className="mt-5 text-lg leading-8 text-slate-600">
                 Book convenient home sample collection for lab tests and health packages with Nova Diagnostics.

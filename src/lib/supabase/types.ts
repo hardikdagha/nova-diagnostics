@@ -40,6 +40,7 @@ export interface Database {
           report_date: string;
           file_path: string;
           token_hash: string;
+          token: string | null;
           status: "draft" | "ready" | "archived" | "revoked";
           expires_at: string | null;
           revoked_at: string | null;
@@ -49,7 +50,7 @@ export interface Database {
           created_at: string;
           updated_at: string;
         };
-        Insert: Omit<Database["public"]["Tables"]["reports"]["Row"], "id" | "created_at" | "updated_at" | "download_count">;
+        Insert: Omit<Database["public"]["Tables"]["reports"]["Row"], "id" | "created_at" | "updated_at" | "download_count" | "token"> & { token?: string | null };
         Update: Partial<Database["public"]["Tables"]["reports"]["Insert"]>;
       };
       report_access_logs: {
