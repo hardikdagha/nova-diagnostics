@@ -37,6 +37,18 @@ const terms = [
     title: "Refunds and cancellations",
     body: "For cancellation or rescheduling requests, please contact Nova Diagnostics directly via call or WhatsApp. Refund decisions are subject to lab policy.",
   },
+  {
+    title: "Digital report delivery",
+    body: "Reports may be delivered digitally through secure links sent to your registered mobile number or email via WhatsApp. Secure report links are private — do not share them unless you wish another person to access your report. Nova Diagnostics is not responsible for unauthorised access arising from sharing of report links.",
+  },
+  {
+    title: "Patient portal",
+    body: "The patient portal allows registered patients to view and download their reports online. Access requires a valid email address registered at the time of testing. Nova Diagnostics staff can assist with portal access issues.",
+  },
+  {
+    title: "Data and consent",
+    body: "By using Nova Diagnostics services, you consent to Nova Diagnostics processing your name, phone number, email, and test details for report delivery and patient support. Access to reports is logged for security purposes. Please review our Privacy Policy for full details.",
+  },
 ];
 
 export default function TermsPage() {

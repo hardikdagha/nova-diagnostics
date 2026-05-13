@@ -1,8 +1,5 @@
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
-import { Footer } from "@/components/layout/Footer";
-import { Header } from "@/components/layout/Header";
-import { MobileStickyCTA } from "@/components/layout/MobileStickyCTA";
 import { siteConfig } from "@/config/site";
 import "./globals.css";
 
@@ -40,12 +37,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en-IN" className={manrope.variable}>
-      <body>
-        <Header />
-        <main>{children}</main>
-        <Footer />
-        <MobileStickyCTA />
-      </body>
+      <body>{children}</body>
     </html>
   );
 }
