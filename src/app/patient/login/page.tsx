@@ -37,17 +37,26 @@ export default function PatientLoginPage() {
     setLoading(true);
     setError("");
 
+    // emailRedirectTo must match an allowed redirect URL in Supabase dashboard
+    // → Authentication → URL Configuration → Redirect URLs → add https://novadiagnosticslab.com/**
     const { error: authError } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: `${window.location.origin}/auth/callback/`,
       },
     });
 
     setLoading(false);
 
     if (authError) {
-      setError("Could not send login link. Please check your email and try again.");
+      // Surface the actual Supabase error so configuration issues are visible
+      if (authError.message.toLowerCase().includes("redirect")) {
+        setError("Login link could not be sent. The site may need Supabase redirect URL configuration — please contact Nova Diagnostics support.");
+      } else if (authError.message.toLowerCase().includes("rate")) {
+        setError("Too many attempts. Please wait a few minutes and try again.");
+      } else {
+        setError(`Could not send login link: ${authError.message}`);
+      }
       return;
     }
 

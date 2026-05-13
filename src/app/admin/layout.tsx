@@ -22,7 +22,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (!session) {
-        router.replace("/admin/login");
+        router.replace("/admin/login/");
         return;
       }
       // Verify staff/admin role
@@ -35,7 +35,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       if (!data) {
         await supabase.auth.signOut();
-        router.replace("/admin/login");
+        router.replace("/admin/login/");
         return;
       }
       setStaffEmail(session.user.email ?? null);
@@ -45,11 +45,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
-    router.replace("/admin/login");
+    router.replace("/admin/login/");
   };
 
-  // Login page renders without the chrome
-  if (pathname === "/admin/login") {
+  // Login page renders without the admin chrome.
+  // Strip trailing slash for comparison because trailingSlash:true in next.config
+  // makes usePathname() return "/admin/login/" (with slash) on static export.
+  const normalizedPath = pathname?.replace(/\/$/, "") ?? "";
+  if (normalizedPath === "/admin/login") {
     return <>{children}</>;
   }
 

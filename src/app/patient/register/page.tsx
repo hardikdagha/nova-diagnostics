@@ -46,7 +46,7 @@ export default function PatientRegisterPage() {
     const { error: authError } = await supabase.auth.signInWithOtp({
       email: form.email,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: `${window.location.origin}/auth/callback/`,
         data: {
           full_name: form.fullName,
           // Mobile stored for future phone-OTP verification; not used for report matching yet
@@ -58,7 +58,13 @@ export default function PatientRegisterPage() {
     setLoading(false);
 
     if (authError) {
-      setError("Could not create account. Please try again.");
+      if (authError.message.toLowerCase().includes("redirect")) {
+        setError("Could not send confirmation email. Please contact Nova Diagnostics support.");
+      } else if (authError.message.toLowerCase().includes("rate")) {
+        setError("Too many attempts. Please wait a few minutes and try again.");
+      } else {
+        setError(`Could not create account: ${authError.message}`);
+      }
       return;
     }
 
