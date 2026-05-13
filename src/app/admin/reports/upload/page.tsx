@@ -119,7 +119,7 @@ export default function UploadReportPage() {
         throw new Error(`Could not save report: ${insertError.message}`);
       }
 
-      const reportUrl = `https://novadiagnosticslab.com/r/${token}`;
+      const reportUrl = `https://novadiagnosticslab.com/r/?t=${token}`;
       const whatsappMessage = `Hello ${form.patientName}, your report from Nova Diagnostics is ready.\n\nReport No: ${reportNumber}\n\nDownload report:\n${reportUrl}\n\nNova Diagnostics\n+91 8433706778`;
 
       setResult({ reportId: inserted?.id ?? "", reportNumber, token, whatsappMessage });

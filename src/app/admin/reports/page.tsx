@@ -98,7 +98,7 @@ function AdminReportsContent() {
   });
 
   const buildMessage = (r: Report, token: string) => {
-    const url = `https://novadiagnosticslab.com/r/${token}`;
+    const url = `https://novadiagnosticslab.com/r/?t=${token}`;
     return `Hello ${r.patient_name}, your report from Nova Diagnostics is ready.\n\nReport No: ${r.report_number}\n\nDownload report:\n${url}\n\nNova Diagnostics\n+91 8433706778`;
   };
 
@@ -177,7 +177,7 @@ function AdminReportsContent() {
                 {newToken ? "New link generated" : "Report link"}
               </div>
               <a
-                href={`https://novadiagnosticslab.com/r/${activeToken}`}
+                href={`https://novadiagnosticslab.com/r/?t=${activeToken}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-1 text-xs font-medium text-teal-600 hover:text-teal-800"
@@ -189,7 +189,7 @@ function AdminReportsContent() {
             <div className="border-b border-slate-50 px-5 py-3">
               <p className="mb-1 text-xs font-semibold text-slate-400">Shareable URL</p>
               <p className="break-all text-xs text-slate-700 font-mono">
-                {`https://novadiagnosticslab.com/r/${activeToken}`}
+                {`https://novadiagnosticslab.com/r/?t=${activeToken}`}
               </p>
             </div>
             <pre className="whitespace-pre-wrap break-all px-5 py-4 text-sm leading-7 text-slate-700">

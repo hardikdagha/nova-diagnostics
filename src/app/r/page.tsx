@@ -72,10 +72,8 @@ export default function ReportPage() {
 
   useEffect(() => {
     void (async () => {
-      // Extract token from /r/<token> path
-      const path = window.location.pathname; // e.g. /r/abc123xyz
-      const parts = path.split("/").filter(Boolean);
-      const t = parts[1] ?? null; // parts[0] = "r", parts[1] = token
+      // Extract token from ?t= query parameter
+      const t = new URLSearchParams(window.location.search).get("t");
 
       // Yield before calling setState (satisfies react-hooks/set-state-in-effect)
       await Promise.resolve();
