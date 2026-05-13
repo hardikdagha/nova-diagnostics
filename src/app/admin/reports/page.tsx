@@ -6,7 +6,7 @@ import { supabase } from "@/lib/supabase/client";
 import type { Report } from "@/lib/supabase/types";
 import {
   AlertTriangle, ArrowLeft, CheckCircle, Copy, Download,
-  Eye, Plus, RefreshCw, Search, XCircle,
+  ExternalLink, Eye, Link2, Link2Off, Plus, RefreshCw, Search, XCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { inputClass } from "@/components/forms/formStyles";
@@ -93,14 +93,14 @@ function AdminReportsContent() {
     );
   });
 
-  const buildMessage = (r: Report, token?: string) => {
-    const url = token ? `https://novadiagnosticslab.com/r/${token}` : "[link not available — regenerate]";
+  const buildMessage = (r: Report, token: string) => {
+    const url = `https://novadiagnosticslab.com/r/${token}`;
     return `Hello ${r.patient_name}, your report from Nova Diagnostics is ready.\n\nReport No: ${r.report_number}\n\nDownload report:\n${url}\n\nNova Diagnostics\n+91 8433706778`;
   };
 
-  const copyMessage = async (token?: string) => {
-    if (!selected) return;
-    await navigator.clipboard.writeText(buildMessage(selected, token ?? newToken ?? undefined));
+  const copyMessage = async () => {
+    if (!selected || !newToken) return;
+    await navigator.clipboard.writeText(buildMessage(selected, newToken));
     setCopied(true);
     setTimeout(() => setCopied(false), 3000);
   };
@@ -163,29 +163,75 @@ function AdminReportsContent() {
           </dl>
         </div>
 
-        {/* WhatsApp message */}
-        <div className="card-premium overflow-hidden">
-          <div className="border-b border-slate-100 bg-slate-50 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
-            WhatsApp Message
+        {/* Link status + WhatsApp message */}
+        {newToken ? (
+          /* After regeneration — show WhatsApp message and test link */
+          <div className="card-premium overflow-hidden">
+            <div className="flex items-center justify-between border-b border-slate-100 bg-emerald-50 px-5 py-3">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-emerald-700">
+                <Link2 className="size-3.5" /> New link generated
+              </div>
+              <a
+                href={`https://novadiagnosticslab.com/r/${newToken}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 text-xs font-medium text-teal-600 hover:text-teal-800"
+              >
+                <ExternalLink className="size-3.5" /> Test link
+              </a>
+            </div>
+            <pre className="whitespace-pre-wrap break-all px-5 py-4 text-sm leading-7 text-slate-700">
+              {buildMessage(selected, newToken)}
+            </pre>
+            <div className="border-t border-slate-100 px-5 py-3">
+              <button onClick={copyMessage} className="btn-primary w-full gap-2">
+                {copied ? <CheckCircle className="size-4" /> : <Copy className="size-4" />}
+                {copied ? "Copied!" : "Copy WhatsApp Message"}
+              </button>
+              <p className="mt-2 text-center text-xs text-slate-400">
+                Send this message to the patient via WhatsApp.
+              </p>
+            </div>
           </div>
-          <pre className="whitespace-pre-wrap break-all px-5 py-4 text-sm leading-7 text-slate-700">
-            {buildMessage(selected, newToken ?? undefined)}
-          </pre>
-          <div className="border-t border-slate-100 px-5 py-3">
-            <button onClick={() => copyMessage()} className="btn-primary w-full gap-2">
-              {copied ? <CheckCircle className="size-4" /> : <Copy className="size-4" />}
-              {copied ? "Copied!" : "Copy WhatsApp Message"}
-            </button>
-            {newToken && (
-              <p className="mt-2 text-center text-xs text-emerald-600">New link generated — copy message above to send.</p>
-            )}
+        ) : (
+          /* No newToken yet — explain the link status */
+          <div className="card-premium p-5">
+            <div className="flex items-start gap-3">
+              {selected.status === "ready" ? (
+                <>
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50">
+                    <Link2 className="size-4 text-emerald-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-slate-800">Link is active</p>
+                    <p className="mt-0.5 text-xs leading-5 text-slate-500">
+                      This report has an active download link. The raw URL is not stored for security reasons.
+                      Click <strong>Regenerate</strong> below to create a fresh link and get the WhatsApp message.
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-rose-50">
+                    <Link2Off className="size-4 text-rose-500" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-slate-800">Link not active</p>
+                    <p className="mt-0.5 text-xs leading-5 text-slate-500">
+                      Status is <strong>{selected.status}</strong>. Regenerate to issue a new active link.
+                    </p>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Actions */}
         <div className="flex flex-wrap gap-3">
           <button onClick={regenerateLink} disabled={actionLoading} className="btn-secondary flex items-center gap-2 text-sm disabled:opacity-50">
-            <RefreshCw className="size-4" /> Regenerate link
+            <RefreshCw className={`size-4 ${actionLoading ? "animate-spin" : ""}`} />
+            {newToken ? "Regenerate again" : "Regenerate link"}
           </button>
           {selected.status !== "revoked" && (
             <button onClick={revokeReport} disabled={actionLoading} className="flex items-center gap-2 rounded-[8px] border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-600 hover:bg-rose-100 disabled:opacity-50">
