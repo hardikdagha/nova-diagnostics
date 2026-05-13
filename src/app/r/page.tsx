@@ -269,11 +269,11 @@ export default function ReportPage() {
           </div>
         </div>
 
-        {/* My Reports nudge */}
+        {/* Patient login nudge — soft, not mandatory */}
         <p className="mt-5 text-center text-xs text-slate-400">
-          Want to view all reports linked to your email?{" "}
+          Want to view reports linked to your email?{" "}
           <Link href="/patient/login" className="underline hover:text-slate-600">
-            Login to My Reports
+            Patient Login
           </Link>
         </p>
       </div>

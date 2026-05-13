@@ -179,17 +179,17 @@ export default function ReportLookupPage() {
             </div>
           )}
 
-          {/* Patient login prompt */}
+          {/* Patient login nudge — secondary option, does not weaken lookup security */}
           <div className="mt-4 rounded-xl border border-slate-200 bg-white p-5 text-center">
-            <p className="text-sm font-medium text-slate-700">Have a Nova Diagnostics account?</p>
+            <p className="text-sm font-medium text-slate-700">Prefer to login?</p>
             <p className="mt-1 text-xs text-slate-500">
-              Login to view all reports linked to your verified email address.
+              View all reports linked to your verified email address after logging in.
             </p>
             <Link
               href="/patient/login"
-              className="btn-primary mt-3 inline-flex justify-center text-sm"
+              className="btn-secondary mt-3 inline-flex justify-center text-sm"
             >
-              Login to My Reports
+              Patient Login
             </Link>
           </div>
 

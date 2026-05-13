@@ -98,7 +98,7 @@ export default function PatientRegisterPage() {
       <div className="w-full max-w-sm space-y-4">
         {/* Title */}
         <div className="mb-6 text-center">
-          <h1 className="text-2xl font-semibold text-slate-950">Create Account</h1>
+          <h1 className="text-2xl font-semibold text-slate-950">Patient Registration</h1>
           <p className="mt-2 text-sm leading-6 text-slate-500">
             Create an account to view reports linked to your verified email address.
           </p>
@@ -159,7 +159,8 @@ export default function PatientRegisterPage() {
               />
             </div>
             <p className="mt-1 text-xs text-slate-400">
-              Stored for future use. Not used to match reports until verified.
+              Collected for support and contact purposes. Report matching by mobile will be
+              enabled only after phone verification is added.
             </p>
           </div>
 

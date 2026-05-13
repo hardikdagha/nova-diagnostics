@@ -87,7 +87,7 @@ export default function PatientLoginPage() {
       <div className="w-full max-w-sm space-y-4">
         {/* Title */}
         <div className="mb-6 text-center">
-          <h1 className="text-2xl font-semibold text-slate-950">Access Your Reports</h1>
+          <h1 className="text-2xl font-semibold text-slate-950">Patient Login</h1>
           <p className="mt-2 text-sm leading-6 text-slate-500">
             Login with your email to view reports linked to your Nova Diagnostics account.
           </p>
