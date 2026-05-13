@@ -17,7 +17,7 @@ import { siteConfig } from "@/config/site";
 import { cn, getCallUrl, getWhatsappUrl } from "@/lib/utils";
 import { supabase } from "@/lib/supabase/client";
 
-/** Core marketing navigation — no patient-portal items here */
+/** Marketing navigation — same 6 items as before, no patient-portal link here */
 const navigation = [
   { label: "Tests", href: "/tests" },
   { label: "Packages", href: "/packages" },
@@ -31,30 +31,24 @@ export function Header() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   /**
-   * isLoggedIn starts false (correct for all unauthenticated visitors).
-   * After hydration, Supabase reports the real session state.
-   * Logged-in patients see "My Reports"; others see "Patient Login".
+   * Auth-aware patient portal label.
+   * Defaults to false (correct for all public visitors).
+   * Switches after hydration once Supabase confirms a session.
    */
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    // Check existing session on mount
     void supabase.auth.getSession().then(({ data: { session } }) => {
       setIsLoggedIn(!!session);
     });
-
-    // Keep in sync with sign-in / sign-out in other tabs
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsLoggedIn(!!session);
     });
-
     return () => subscription.unsubscribe();
   }, []);
 
-  // Auth-aware patient portal link
   const patientHref  = isLoggedIn ? "/patient/dashboard" : "/patient/login";
   const patientLabel = isLoggedIn ? "My Reports" : "Patient Login";
-  const mobilePatientLabel = isLoggedIn ? "Patient Dashboard" : "Patient Login / Register";
   const isPatientRoute = pathname.startsWith("/patient") || pathname.startsWith("/auth");
 
   return (
@@ -78,7 +72,7 @@ export function Header() {
       <div className="container-page flex min-h-20 items-center justify-between gap-4">
         <BrandLogo variant="header" />
 
-        {/* Desktop navigation */}
+        {/* Desktop marketing nav — original items, whitespace-nowrap to prevent wrapping */}
         <nav className="hidden items-center gap-1 lg:flex" aria-label="Main navigation">
           {navigation.map((item) => {
             const active =
@@ -88,7 +82,7 @@ export function Header() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "rounded-[8px] px-3 py-2 text-sm font-semibold text-slate-600 transition hover:bg-cyan-50 hover:text-teal-800",
+                  "whitespace-nowrap rounded-[8px] px-3 py-2 text-sm font-semibold text-slate-600 transition hover:bg-cyan-50 hover:text-teal-800",
                   active && "bg-cyan-50 text-teal-800",
                 )}
               >
@@ -96,22 +90,22 @@ export function Header() {
               </Link>
             );
           })}
+        </nav>
 
-          {/* Patient portal — shown as "Patient Login" when logged out, "My Reports" when logged in */}
+        {/* Desktop right-side actions: Patient Login (compact) + WhatsApp + Book Test */}
+        <div className="hidden items-center gap-2 lg:flex">
+          {/* Patient portal — icon + short label, not a main CTA */}
           <Link
             href={patientHref}
             className={cn(
-              "flex items-center gap-1.5 rounded-[8px] px-3 py-2 text-sm font-semibold text-slate-600 transition hover:bg-cyan-50 hover:text-teal-800",
-              isPatientRoute && "bg-cyan-50 text-teal-800",
+              "flex items-center gap-1.5 whitespace-nowrap rounded-[8px] px-3 py-2 text-sm font-semibold text-slate-500 transition hover:bg-slate-100 hover:text-slate-900",
+              isPatientRoute && "bg-slate-100 text-slate-900",
             )}
           >
-            <User className="size-3.5" aria-hidden="true" />
+            <User className="size-4" aria-hidden="true" />
             {patientLabel}
           </Link>
-        </nav>
 
-        {/* Desktop CTA buttons */}
-        <div className="hidden items-center gap-3 lg:flex">
           <a href={getWhatsappUrl()} className="btn-secondary">
             <MessageCircle className="size-4" aria-hidden="true" />
             WhatsApp
@@ -149,7 +143,7 @@ export function Header() {
               </Link>
             ))}
 
-            {/* Patient portal link in mobile menu */}
+            {/* Patient portal in mobile menu */}
             <Link
               href={patientHref}
               className={cn(
@@ -159,7 +153,7 @@ export function Header() {
               onClick={() => setIsOpen(false)}
             >
               <User className="size-4" aria-hidden="true" />
-              {mobilePatientLabel}
+              {isLoggedIn ? "Patient Dashboard" : "Patient Login / Register"}
             </Link>
 
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
