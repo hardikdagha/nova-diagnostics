@@ -33,7 +33,7 @@ export default function TestsPage() {
             <div className="grid gap-3 sm:grid-cols-2">
               <a href={getWhatsappUrl("Hello Nova Diagnostics, I would like help booking a test.")} className="btn-primary">
                 <MessageCircle className="size-4" aria-hidden="true" />
-                WhatsApp Book
+                Book via WhatsApp
               </a>
               <Link href="/upload-prescription" className="btn-secondary">
                 <FileUp className="size-4" aria-hidden="true" />

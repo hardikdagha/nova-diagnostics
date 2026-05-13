@@ -28,7 +28,7 @@ async function generateNewToken(reportId: string) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await (supabase as any)
     .from("reports")
-    .update({ token_hash: hash, revoked_at: null, status: "ready" })
+    .update({ token_hash: hash, token: raw, revoked_at: null, status: "ready" })
     .eq("id", reportId);
 
   if (error) throw error;
@@ -47,7 +47,11 @@ function AdminReportsContent() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  // newToken holds the raw token after a regeneration action in this session.
+  // selected.token holds the persisted token from DB (available for all reports
+  // once they have been uploaded/regenerated with the new schema).
   const [newToken, setNewToken] = useState<string | null>(null);
+  const activeToken = newToken ?? selected?.token ?? null;
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -99,8 +103,8 @@ function AdminReportsContent() {
   };
 
   const copyMessage = async () => {
-    if (!selected || !newToken) return;
-    await navigator.clipboard.writeText(buildMessage(selected, newToken));
+    if (!selected || !activeToken) return;
+    await navigator.clipboard.writeText(buildMessage(selected, activeToken));
     setCopied(true);
     setTimeout(() => setCopied(false), 3000);
   };
@@ -163,16 +167,17 @@ function AdminReportsContent() {
           </dl>
         </div>
 
-        {/* Link status + WhatsApp message */}
-        {newToken ? (
-          /* After regeneration — show WhatsApp message and test link */
+        {/* Link + WhatsApp message */}
+        {activeToken ? (
+          /* Token available (from DB or just regenerated) */
           <div className="card-premium overflow-hidden">
-            <div className="flex items-center justify-between border-b border-slate-100 bg-emerald-50 px-5 py-3">
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-emerald-700">
-                <Link2 className="size-3.5" /> New link generated
+            <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 px-5 py-3">
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                <Link2 className="size-3.5" />
+                {newToken ? "New link generated" : "Report link"}
               </div>
               <a
-                href={`https://novadiagnosticslab.com/r/${newToken}`}
+                href={`https://novadiagnosticslab.com/r/${activeToken}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-1 text-xs font-medium text-teal-600 hover:text-teal-800"
@@ -180,8 +185,15 @@ function AdminReportsContent() {
                 <ExternalLink className="size-3.5" /> Test link
               </a>
             </div>
+            {/* Shareable URL */}
+            <div className="border-b border-slate-50 px-5 py-3">
+              <p className="mb-1 text-xs font-semibold text-slate-400">Shareable URL</p>
+              <p className="break-all text-xs text-slate-700 font-mono">
+                {`https://novadiagnosticslab.com/r/${activeToken}`}
+              </p>
+            </div>
             <pre className="whitespace-pre-wrap break-all px-5 py-4 text-sm leading-7 text-slate-700">
-              {buildMessage(selected, newToken)}
+              {buildMessage(selected, activeToken)}
             </pre>
             <div className="border-t border-slate-100 px-5 py-3">
               <button onClick={copyMessage} className="btn-primary w-full gap-2">
@@ -194,19 +206,19 @@ function AdminReportsContent() {
             </div>
           </div>
         ) : (
-          /* No newToken yet — explain the link status */
+          /* No token in DB — old report uploaded before token storage was added */
           <div className="card-premium p-5">
             <div className="flex items-start gap-3">
               {selected.status === "ready" ? (
                 <>
-                  <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50">
-                    <Link2 className="size-4 text-emerald-600" />
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-50">
+                    <Link2 className="size-4 text-amber-600" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-slate-800">Link is active</p>
+                    <p className="text-sm font-semibold text-slate-800">Link active — URL not on file</p>
                     <p className="mt-0.5 text-xs leading-5 text-slate-500">
-                      This report has an active download link. The raw URL is not stored for security reasons.
-                      Click <strong>Regenerate</strong> below to create a fresh link and get the WhatsApp message.
+                      This report was uploaded before link storage was enabled. Click{" "}
+                      <strong>Regenerate link</strong> to issue a new link and see the full URL and WhatsApp message.
                     </p>
                   </div>
                 </>
@@ -231,7 +243,7 @@ function AdminReportsContent() {
         <div className="flex flex-wrap gap-3">
           <button onClick={regenerateLink} disabled={actionLoading} className="btn-secondary flex items-center gap-2 text-sm disabled:opacity-50">
             <RefreshCw className={`size-4 ${actionLoading ? "animate-spin" : ""}`} />
-            {newToken ? "Regenerate again" : "Regenerate link"}
+            {activeToken ? "Regenerate link" : "Generate link"}
           </button>
           {selected.status !== "revoked" && (
             <button onClick={revokeReport} disabled={actionLoading} className="flex items-center gap-2 rounded-[8px] border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-600 hover:bg-rose-100 disabled:opacity-50">

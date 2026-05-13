@@ -108,6 +108,7 @@ export default function UploadReportPage() {
         report_date: form.reportDate,
         file_path: filePath,
         token_hash: tokenHash,
+        token,
         status: "ready",
         uploaded_by: session.user.id,
       }).select("id").single();
