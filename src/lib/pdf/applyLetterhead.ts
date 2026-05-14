@@ -1,22 +1,37 @@
 import { PDFDocument } from "pdf-lib";
 
 /**
- * Overlays the Nova Diagnostics letterhead PNG on every page of the source PDF.
+ * Composites every page of the source PDF onto the Nova Diagnostics letterhead.
  *
  * Letterhead asset: /assets/letterhead.png  (place in /public/assets/)
  *
- * The PNG must be full-page (same dimensions as the report PDF, e.g. A4 at 595×842 pt):
- *   - Opaque header band  — Nova logo, lab name, address, contact
- *   - Transparent body    — Crystal Reports content shows through
- *   - Opaque footer band  — Doctor name, signature, registration number
+ * Layer order per output page:
+ *   1. Letterhead PNG — drawn as the full-A4 background (header + footer opaque, body transparent)
+ *   2. Crystal Reports content — scaled to fit inside the letterhead's transparent content area
+ *      so the opaque header/footer are never obscured by report content.
  *
- * Layer order per page:
- *   1. Crystal Reports content (embedded source page — background)
- *   2. Letterhead PNG overlay (header + footer opaque, body transparent)
+ * Content area boundaries (pre-computed from letterhead.png pixel analysis):
+ *   Header ends at 17.16 % from top  → 144.5 pt on A4
+ *   Footer starts at 83.69 % from top → 704.7 pt on A4
  *
- * If the asset is missing or fails to load the original file is returned unchanged
- * so the upload workflow still functions without a letterhead configured.
+ * Crystal Reports PDFs are often Letter-size (612×792 pt).  The content is scaled
+ * uniformly to fill the available content-area height, then centred horizontally.
+ *
+ * Falls back to the original file unchanged if the letterhead asset is missing.
  */
+
+// Output page is always A4
+const OUT_W = 595;
+const OUT_H = 842;
+
+// Letterhead content-area boundaries (measured from letterhead.png)
+const HEADER_END_FRAC = 0.1716;   // header ends at 17.16 % from top
+const FOOTER_START_FRAC = 0.8369; // footer starts at 83.69 % from top
+
+const CONTENT_TOP = HEADER_END_FRAC * OUT_H;    // ≈ 144.5 pt from top
+const CONTENT_BOTTOM = FOOTER_START_FRAC * OUT_H; // ≈ 704.7 pt from top
+const CONTENT_H = CONTENT_BOTTOM - CONTENT_TOP;  // ≈ 560.2 pt available
+
 export async function applyLetterhead(
   sourceFile: File
 ): Promise<{ file: File; applied: boolean }> {
@@ -24,18 +39,16 @@ export async function applyLetterhead(
   let letterheadBytes: ArrayBuffer | null = null;
   try {
     const res = await fetch("/assets/letterhead.png");
-    if (res.ok) {
-      letterheadBytes = await res.arrayBuffer();
-    }
+    if (res.ok) letterheadBytes = await res.arrayBuffer();
   } catch {
-    // Asset not configured — fall back to original
+    /* asset not configured — fall back gracefully */
   }
 
   if (!letterheadBytes) {
     return { file: sourceFile, applied: false };
   }
 
-  // --- 2. Load source PDF and create output document ---
+  // --- 2. Load source PDF ---
   const srcBytes = await sourceFile.arrayBuffer();
   const srcDoc = await PDFDocument.load(srcBytes);
   const outDoc = await PDFDocument.create();
@@ -46,27 +59,38 @@ export async function applyLetterhead(
   for (let i = 0; i < pageCount; i++) {
     const srcPage = srcDoc.getPage(i);
     const [embeddedPage] = await outDoc.embedPages([srcPage]);
-    const { width, height } = srcPage.getSize();
+    const srcW = srcPage.getWidth();
+    const srcH = srcPage.getHeight();
 
-    const page = outDoc.addPage([width, height]);
+    // Scale Crystal Reports to fill the content area (maintain aspect ratio)
+    const scale = Math.min(OUT_W / srcW, CONTENT_H / srcH);
+    const drawW = srcW * scale;
+    const drawH = srcH * scale;
 
-    // Layer 1 — Crystal Reports content (drawn first, underneath)
-    page.drawPage(embeddedPage, { x: 0, y: 0, width, height });
+    // Centre horizontally; align top of report content with bottom of letterhead header
+    const drawX = (OUT_W - drawW) / 2;
+    // pdf-lib y origin is bottom-left; position so top of draw area = CONTENT_TOP from page top
+    const drawY = OUT_H - CONTENT_TOP - drawH;
 
-    // Layer 2 — Letterhead overlay (drawn on top; transparent body reveals layer 1)
-    page.drawImage(letterheadImg, { x: 0, y: 0, width, height });
+    const page = outDoc.addPage([OUT_W, OUT_H]);
+
+    // Layer 1 — Letterhead (background); content area is transparent
+    page.drawImage(letterheadImg, { x: 0, y: 0, width: OUT_W, height: OUT_H });
+
+    // Layer 2 — Crystal Reports content (scaled, sits entirely within content area)
+    page.drawPage(embeddedPage, { x: drawX, y: drawY, width: drawW, height: drawH });
   }
 
   const outBytes = await outDoc.save();
   const baseName = sourceFile.name.replace(/\.pdf$/i, "");
-  // pdf-lib returns Uint8Array<ArrayBufferLike>; slice() guarantees a plain ArrayBuffer
+  // pdf-lib returns Uint8Array<ArrayBufferLike>; slice() gives a plain ArrayBuffer
   const outBuffer = outBytes.buffer.slice(
     outBytes.byteOffset,
     outBytes.byteOffset + outBytes.byteLength
   ) as ArrayBuffer;
-  const outFile = new File([outBuffer], `${baseName}_nova.pdf`, {
-    type: "application/pdf",
-  });
 
-  return { file: outFile, applied: true };
+  return {
+    file: new File([outBuffer], `${baseName}_nova.pdf`, { type: "application/pdf" }),
+    applied: true,
+  };
 }

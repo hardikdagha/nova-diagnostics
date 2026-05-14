@@ -6,10 +6,14 @@ import { supabase } from "@/lib/supabase/client";
 import type { Report } from "@/lib/supabase/types";
 import {
   AlertTriangle, ArrowLeft, CheckCircle, Copy, Download,
-  ExternalLink, Eye, Link2, Link2Off, Mail, Plus, RefreshCw, Search, XCircle,
+  ExternalLink, Eye, Link2, Link2Off, Mail, Plus, RefreshCw,
+  Search, Trash2, XCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { inputClass } from "@/components/forms/formStyles";
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
 const STATUS_CHIP: Record<string, string> = {
   ready:    "bg-emerald-100 text-emerald-700",
@@ -42,15 +46,15 @@ function AdminReportsContent() {
 
   const [reports, setReports] = useState<Report[]>([]);
   const [selected, setSelected] = useState<Report | null>(null);
-  const [logs, setLogs] = useState<Array<{ action: string; success: boolean; access_method: string | null; created_at: string }>>([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [emailState, setEmailState] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [dlPhase, setDlPhase] = useState<"idle" | "loading" | "ready">("idle");
+  const [dlUrl, setDlUrl] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   // newToken holds the raw token after a regeneration action in this session.
-  // selected.token holds the persisted token from DB (available for all reports
-  // once they have been uploaded/regenerated with the new schema).
   const [newToken, setNewToken] = useState<string | null>(null);
   const activeToken = newToken ?? selected?.token ?? null;
 
@@ -64,26 +68,20 @@ function AdminReportsContent() {
     setLoading(false);
   }, []);
 
-  // Defer load() into a microtask so setState inside it isn't synchronous in the effect body
   useEffect(() => {
     void Promise.resolve().then(() => load());
   }, [load]);
 
   useEffect(() => {
     void (async () => {
-      await Promise.resolve(); // yield before setState
+      await Promise.resolve();
       if (!selectedId) { setSelected(null); return; }
       const r = reports.find((r) => r.id === selectedId) ?? null;
       setSelected(r);
-      if (r) {
-        const { data } = await supabase
-          .from("report_access_logs")
-          .select("action, success, access_method, created_at")
-          .eq("report_id", r.id)
-          .order("created_at", { ascending: false })
-          .limit(20);
-        setLogs(data ?? []);
-      }
+      // Reset per-report UI state when switching reports
+      setDlPhase("idle");
+      setDlUrl(null);
+      setNewToken(null);
     })();
   }, [selectedId, reports]);
 
@@ -124,34 +122,29 @@ function AdminReportsContent() {
     setEmailState("sending");
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/send-report-email`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-            Authorization: `Bearer ${session?.access_token}`,
-          },
-          body: JSON.stringify({
-            patientEmail: selected.patient_email,
-            patientName: selected.patient_name,
-            reportNumber: selected.report_number,
-            reportUrl: `https://novadiagnosticslab.com/r/?t=${activeToken}`,
-          }),
-        }
-      );
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/send-report-email`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({
+          patientEmail: selected.patient_email,
+          patientName: selected.patient_name,
+          reportNumber: selected.report_number,
+          reportUrl: `https://novadiagnosticslab.com/r/?t=${activeToken}`,
+        }),
+      });
       const json = await res.json();
       if (json.success) {
         setEmailState("sent");
         setTimeout(() => setEmailState("idle"), 5000);
       } else {
-        console.error("send-report-email:", json);
         setEmailState("error");
         setTimeout(() => setEmailState("idle"), 5000);
       }
-    } catch (err) {
-      console.error("send-report-email fetch error:", err);
+    } catch {
       setEmailState("error");
       setTimeout(() => setEmailState("idle"), 5000);
     }
@@ -170,6 +163,54 @@ function AdminReportsContent() {
     setActionLoading(false);
   };
 
+  const handleStaffDownload = async () => {
+    if (!selected) return;
+    setDlPhase("loading");
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/fallback-report-lookup`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({
+          reportNumber: selected.report_number,
+          mobile: selected.patient_mobile,
+        }),
+      });
+      const json = await res.json();
+      if (json.signedUrl) {
+        setDlUrl(json.signedUrl);
+        setDlPhase("ready");
+      } else {
+        setDlPhase("idle");
+      }
+    } catch {
+      setDlPhase("idle");
+    }
+  };
+
+  const deleteReport = async (r: Report, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm(`Delete report ${r.report_number} for ${r.patient_name}?\n\nThis cannot be undone.`)) return;
+    setDeletingId(r.id);
+    try {
+      // Best-effort: remove file from storage
+      if (r.file_path) {
+        await supabase.storage.from("reports").remove([r.file_path]);
+      }
+      // Delete report row (DB cascade handles related rows)
+      await supabase.from("reports").delete().eq("id", r.id);
+      // If viewing this report's detail, go back to list
+      if (selectedId === r.id) router.push("/admin/reports");
+      await load();
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   // Detail panel
   if (selected) {
     return (
@@ -178,6 +219,7 @@ function AdminReportsContent() {
           <ArrowLeft className="size-4" /> Back to reports
         </button>
 
+        {/* Report metadata */}
         <div className="card-premium p-6">
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -208,7 +250,6 @@ function AdminReportsContent() {
 
         {/* Link + WhatsApp message */}
         {activeToken ? (
-          /* Token available (from DB or just regenerated) */
           <div className="card-premium overflow-hidden">
             <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 px-5 py-3">
               <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
@@ -227,27 +268,27 @@ function AdminReportsContent() {
             {/* Shareable URL */}
             <div className="border-b border-slate-50 px-5 py-3">
               <p className="mb-1 text-xs font-semibold text-slate-400">Shareable URL</p>
-              <p className="break-all text-xs text-slate-700 font-mono">
+              <p className="break-all font-mono text-xs text-slate-700">
                 {`https://novadiagnosticslab.com/r/?t=${activeToken}`}
               </p>
             </div>
             <pre className="whitespace-pre-wrap break-all px-5 py-4 text-sm leading-7 text-slate-700">
               {buildMessage(selected, activeToken)}
             </pre>
-            <div className="border-t border-slate-100 px-5 py-4 space-y-3">
+            <div className="space-y-3 border-t border-slate-100 px-5 py-4">
               {/* WhatsApp copy */}
               <button onClick={copyMessage} className="btn-primary w-full gap-2">
                 {copied ? <CheckCircle className="size-4" /> : <Copy className="size-4" />}
                 {copied ? "Copied!" : "Copy WhatsApp Message"}
               </button>
 
-              {/* Send Email — only when patient email is on file */}
+              {/* Send Email */}
               {selected.patient_email ? (
                 <div>
                   <button
                     onClick={handleSendEmail}
                     disabled={emailState === "sending" || emailState === "sent"}
-                    className={`w-full gap-2 rounded-[8px] border px-4 py-2.5 text-sm font-semibold flex items-center justify-center transition-colors disabled:opacity-60 ${
+                    className={`flex w-full items-center justify-center gap-2 rounded-[8px] border px-4 py-2.5 text-sm font-semibold transition-colors disabled:opacity-60 ${
                       emailState === "sent"
                         ? "border-emerald-200 bg-emerald-50 text-emerald-700"
                         : emailState === "error"
@@ -256,10 +297,7 @@ function AdminReportsContent() {
                     }`}
                   >
                     {emailState === "sending" ? (
-                      <>
-                        <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-600" />
-                        Sending…
-                      </>
+                      <><span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-600" /> Sending…</>
                     ) : emailState === "sent" ? (
                       <><CheckCircle className="size-4" /> Email Sent!</>
                     ) : emailState === "error" ? (
@@ -280,7 +318,6 @@ function AdminReportsContent() {
             </div>
           </div>
         ) : (
-          /* No token in DB — old report uploaded before token storage was added */
           <div className="card-premium p-5">
             <div className="flex items-start gap-3">
               {selected.status === "ready" ? (
@@ -292,7 +329,7 @@ function AdminReportsContent() {
                     <p className="text-sm font-semibold text-slate-800">Link active — URL not on file</p>
                     <p className="mt-0.5 text-xs leading-5 text-slate-500">
                       This report was uploaded before link storage was enabled. Click{" "}
-                      <strong>Regenerate link</strong> to issue a new link and see the full URL and WhatsApp message.
+                      <strong>Regenerate link</strong> to issue a new link.
                     </p>
                   </div>
                 </>
@@ -315,39 +352,42 @@ function AdminReportsContent() {
 
         {/* Actions */}
         <div className="flex flex-wrap gap-3">
+          {/* Staff PDF download */}
+          {dlPhase === "ready" && dlUrl ? (
+            <a
+              href={dlUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-primary flex items-center gap-2 text-sm"
+            >
+              <Download className="size-4" /> Open PDF
+            </a>
+          ) : (
+            <button
+              onClick={handleStaffDownload}
+              disabled={dlPhase === "loading"}
+              className="btn-primary flex items-center gap-2 text-sm disabled:opacity-60"
+            >
+              {dlPhase === "loading" ? (
+                <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+              ) : (
+                <Download className="size-4" />
+              )}
+              {dlPhase === "loading" ? "Preparing…" : "Download PDF"}
+            </button>
+          )}
+
           <button onClick={regenerateLink} disabled={actionLoading} className="btn-secondary flex items-center gap-2 text-sm disabled:opacity-50">
             <RefreshCw className={`size-4 ${actionLoading ? "animate-spin" : ""}`} />
             {activeToken ? "Regenerate link" : "Generate link"}
           </button>
+
           {selected.status !== "revoked" && (
             <button onClick={revokeReport} disabled={actionLoading} className="flex items-center gap-2 rounded-[8px] border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-600 hover:bg-rose-100 disabled:opacity-50">
               <XCircle className="size-4" /> Revoke link
             </button>
           )}
         </div>
-
-        {/* Access logs */}
-        {logs.length > 0 && (
-          <div className="card-premium overflow-hidden">
-            <div className="border-b border-slate-100 px-5 py-3 text-sm font-semibold text-slate-800">
-              Access Log
-            </div>
-            <div className="divide-y divide-slate-50">
-              {logs.map((log, i) => (
-                <div key={i} className="flex items-center justify-between px-5 py-2.5 text-xs">
-                  <div className="flex items-center gap-2">
-                    {log.success
-                      ? <CheckCircle className="size-3.5 text-emerald-500" />
-                      : <AlertTriangle className="size-3.5 text-amber-500" />}
-                    <span className="font-medium text-slate-700">{log.action}</span>
-                    <span className="text-slate-400">{log.access_method}</span>
-                  </div>
-                  <span className="text-slate-400">{new Date(log.created_at).toLocaleString("en-IN")}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     );
   }
@@ -384,12 +424,12 @@ function AdminReportsContent() {
       ) : (
         <div className="card-premium divide-y divide-slate-50 overflow-hidden">
           {filtered.map((r) => (
-            <button
-              key={r.id}
-              onClick={() => router.push(`/admin/reports?id=${r.id}`)}
-              className="flex w-full items-center justify-between px-5 py-4 text-left hover:bg-slate-50"
-            >
-              <div className="min-w-0">
+            <div key={r.id} className="flex w-full items-center justify-between px-5 py-4 hover:bg-slate-50">
+              {/* Clickable report info */}
+              <button
+                onClick={() => router.push(`/admin/reports?id=${r.id}`)}
+                className="min-w-0 flex-1 text-left"
+              >
                 <div className="flex items-center gap-2">
                   <p className="truncate font-medium text-slate-950">{r.patient_name}</p>
                   <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_CHIP[r.status]}`}>
@@ -399,14 +439,32 @@ function AdminReportsContent() {
                 <p className="mt-0.5 text-xs text-slate-400">
                   {r.report_number} · {r.test_name} · {r.patient_mobile}
                 </p>
-              </div>
+              </button>
+
+              {/* Row actions */}
               <div className="ml-4 flex shrink-0 items-center gap-3 text-xs text-slate-400">
-                <span className="hidden sm:flex items-center gap-1">
+                <span className="hidden items-center gap-1 sm:flex">
                   <Download className="size-3" />{r.download_count}
                 </span>
-                <Eye className="size-4 text-slate-300" />
+                <button
+                  onClick={() => router.push(`/admin/reports?id=${r.id}`)}
+                  className="rounded p-1 hover:bg-slate-100"
+                  title="View report"
+                >
+                  <Eye className="size-4 text-slate-300 hover:text-slate-500" />
+                </button>
+                <button
+                  onClick={(e) => deleteReport(r, e)}
+                  disabled={deletingId === r.id}
+                  className="rounded p-1 text-slate-300 hover:bg-rose-50 hover:text-rose-500 disabled:opacity-40"
+                  title="Delete report"
+                >
+                  {deletingId === r.id
+                    ? <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-rose-400" />
+                    : <Trash2 className="size-4" />}
+                </button>
               </div>
-            </button>
+            </div>
           ))}
         </div>
       )}
