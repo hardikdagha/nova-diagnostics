@@ -13,9 +13,9 @@ import { PDFDocument } from "pdf-lib";
  *      report content beneath.  This guarantees zero overlap and zero background tint.
  *
  * Content area boundaries (pre-computed from Latest_Temp.png pixel analysis):
- *   Header content ends at row 179/1492 of the PNG → 12.20 % from top (with 3-row buffer)
- *   Footer content starts at row 1225/1492 of the PNG → 81.90 % from top (with 3-row buffer)
- *   Gives ≈ 587 pt of visible content area on A4
+ *   Header content ends at row 179/1491 of the PNG → 12.27 % from top (with 4-row buffer)
+ *   Footer content starts at row 1171/1491 of the PNG → 78.34 % from top (with 3-row buffer)
+ *   Gives ≈ 556 pt of visible content area on A4
  *
  * Crystal Reports PDFs are often Letter-size (612×792 pt).  The content is scaled
  * uniformly to fill the available content-area height, then centred horizontally.
@@ -27,11 +27,11 @@ import { PDFDocument } from "pdf-lib";
 const OUT_W = 595;
 const OUT_H = 842;
 
-// Letterhead content-area boundaries (measured from Latest_Temp.png — 1054×1492 px)
-//   Header content ends at row 179 (+3 buffer) → 12.20 % from top
-//   Footer content begins at row 1225 (-3 buffer) → 81.90 % from top
-const HEADER_END_FRAC = 0.1220;   // header ends at 12.20 % from top  (≈ 103 pt on A4)
-const FOOTER_START_FRAC = 0.8190; // footer starts at 81.90 % from top (≈ 690 pt on A4)
+// Letterhead content-area boundaries (measured from Latest_Temp.png — 1055×1491 px)
+//   Header content ends at row 179 (+4 buffer) → 12.27 % from top
+//   Footer content begins at row 1171 (-3 buffer) → 78.34 % from top
+const HEADER_END_FRAC = 0.1227;   // header ends at 12.27 % from top  (≈ 103 pt on A4)
+const FOOTER_START_FRAC = 0.7834; // footer starts at 78.34 % from top (≈ 660 pt on A4)
 
 const CONTENT_TOP = HEADER_END_FRAC * OUT_H;      // ≈ 102.7 pt from top
 const CONTENT_BOTTOM = FOOTER_START_FRAC * OUT_H;  // ≈ 689.6 pt from top
