@@ -9,9 +9,15 @@
  * - Reports matched only by verified email — NOT by unverified mobile number.
  * - Downloads use the fallback-report-lookup Edge Function (signed URL, 8-min TTL).
  * - Service role key is never used in frontend code.
+ *
+ * Download UX note:
+ * Mobile Safari/Chrome block any programmatic navigation (window.open, anchor.click)
+ * that happens after an async/await gap. The solution: fetch the signed URL in the
+ * background, store it in state, then render a real <a href> that the user taps
+ * directly. A real tap is always a genuine user gesture and is never blocked.
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
@@ -19,6 +25,7 @@ import type { Report } from "@/lib/supabase/types";
 import {
   CalendarCheck,
   Download,
+  ExternalLink,
   FileSearch,
   FileText,
   LogOut,
@@ -30,6 +37,9 @@ import {
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
+// Signed URLs have an 8-minute TTL — expire UI state at 7 min to be safe.
+const SIGNED_URL_TTL_MS = 7 * 60 * 1000;
+
 const STATUS_CHIP: Record<string, string> = {
   ready: "bg-emerald-100 text-emerald-700",
   draft: "bg-amber-100 text-amber-700",
@@ -37,13 +47,20 @@ const STATUS_CHIP: Record<string, string> = {
   archived: "bg-slate-100 text-slate-600",
 };
 
+type DlState =
+  | { phase: "idle" }
+  | { phase: "loading" }
+  | { phase: "ready"; url: string }
+  | { phase: "error"; msg: string };
+
 export default function PatientDashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState<{ email: string; name: string } | null>(null);
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
-  const [downloading, setDownloading] = useState<string | null>(null);
-  const [downloadError, setDownloadError] = useState<string | null>(null);
+  // Per-report download state keyed by report.id
+  const [dlStates, setDlStates] = useState<Record<string, DlState>>({});
+  const expiryTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
@@ -58,8 +75,6 @@ export default function PatientDashboardPage() {
         email.split("@")[0];
       setUser({ email, name });
 
-      // Reports filtered by patient_email = verified auth email (enforced by RLS)
-      // Mobile number is NOT used here — only verified email is trusted.
       const { data } = await supabase
         .from("reports")
         .select("*")
@@ -70,16 +85,21 @@ export default function PatientDashboardPage() {
       setReports(data ?? []);
       setLoading(false);
     });
+
+    // Clear all expiry timers on unmount
+    const timers = expiryTimers.current;
+    return () => { Object.values(timers).forEach(clearTimeout); };
   }, [router]);
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    router.replace("/patient/login");
-  };
+  const setDl = (id: string, state: DlState) =>
+    setDlStates((prev) => ({ ...prev, [id]: state }));
 
-  const handleDownload = async (report: Report) => {
-    setDownloading(report.id);
-    setDownloadError(null);
+  const handleGetLink = async (report: Report) => {
+    const current = dlStates[report.id];
+    // If a URL is already ready, nothing to do — the user just needs to tap the link.
+    if (current?.phase === "loading" || current?.phase === "ready") return;
+
+    setDl(report.id, { phase: "loading" });
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const res = await fetch(
@@ -98,25 +118,28 @@ export default function PatientDashboardPage() {
         }
       );
       const json = await res.json();
+
       if (json.signedUrl) {
-        // window.open() after an await is treated as a popup and blocked on
-        // mobile browsers (Safari / Chrome). Creating an anchor and clicking
-        // it is always treated as a direct user gesture and works on all devices.
-        const a = document.createElement("a");
-        a.href = json.signedUrl;
-        a.target = "_blank";
-        a.rel = "noopener noreferrer";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        setDl(report.id, { phase: "ready", url: json.signedUrl });
+
+        // Auto-expire the link state when the signed URL becomes invalid
+        clearTimeout(expiryTimers.current[report.id]);
+        expiryTimers.current[report.id] = setTimeout(() => {
+          setDl(report.id, { phase: "idle" });
+        }, SIGNED_URL_TTL_MS);
       } else {
-        setDownloadError("Could not generate download link. Please contact Nova Diagnostics.");
+        setDl(report.id, { phase: "error", msg: "Could not prepare download. Please try again." });
+        setTimeout(() => setDl(report.id, { phase: "idle" }), 5000);
       }
     } catch {
-      setDownloadError("Something went wrong. Please try again.");
-    } finally {
-      setDownloading(null);
+      setDl(report.id, { phase: "error", msg: "Something went wrong. Please try again." });
+      setTimeout(() => setDl(report.id, { phase: "idle" }), 5000);
     }
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.replace("/patient/login");
   };
 
   if (loading) {
@@ -154,12 +177,6 @@ export default function PatientDashboardPage() {
       <div>
         <h2 className="mb-3 text-base font-semibold text-slate-950">Your Reports</h2>
 
-        {downloadError && (
-          <p className="mb-3 rounded-lg bg-rose-50 px-4 py-2.5 text-sm text-rose-600">
-            {downloadError}
-          </p>
-        )}
-
         {reports.length === 0 ? (
           <div className="card-premium p-8 text-center">
             <FileText className="mx-auto mb-3 size-10 text-slate-200" />
@@ -190,34 +207,62 @@ export default function PatientDashboardPage() {
                 });
               } catch { /* keep raw */ }
 
+              const dl = dlStates[r.id] ?? { phase: "idle" };
+
               return (
-                <div
-                  key={r.id}
-                  className="flex items-center justify-between gap-4 px-5 py-4"
-                >
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="truncate font-medium text-slate-950">{r.test_name}</p>
-                      <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_CHIP[r.status] ?? STATUS_CHIP.archived}`}>
-                        {r.status}
-                      </span>
+                <div key={r.id} className="px-5 py-4">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <p className="truncate font-medium text-slate-950">{r.test_name}</p>
+                        <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_CHIP[r.status] ?? STATUS_CHIP.archived}`}>
+                          {r.status}
+                        </span>
+                      </div>
+                      <p className="mt-0.5 text-xs text-slate-500">
+                        {r.patient_name} · {r.report_number} · {formattedDate}
+                      </p>
                     </div>
-                    <p className="mt-0.5 text-xs text-slate-500">
-                      {r.patient_name} · {r.report_number} · {formattedDate}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => handleDownload(r)}
-                    disabled={downloading === r.id}
-                    className="btn-primary shrink-0 text-sm disabled:opacity-60"
-                  >
-                    {downloading === r.id ? (
-                      <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+
+                    {/* Download control — changes based on phase */}
+                    {dl.phase === "ready" ? (
+                      // Real anchor — user taps it directly (never blocked on mobile)
+                      <a
+                        href={dl.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn-primary shrink-0 text-sm"
+                      >
+                        <ExternalLink className="size-4" />
+                        Open PDF
+                      </a>
+                    ) : dl.phase === "loading" ? (
+                      <button disabled className="btn-primary shrink-0 text-sm opacity-70">
+                        <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                        Preparing…
+                      </button>
                     ) : (
-                      <Download className="size-4" />
+                      <button
+                        onClick={() => handleGetLink(r)}
+                        className="btn-primary shrink-0 text-sm"
+                      >
+                        <Download className="size-4" />
+                        Download
+                      </button>
                     )}
-                    Download
-                  </button>
+                  </div>
+
+                  {/* Error message inline */}
+                  {dl.phase === "error" && (
+                    <p className="mt-2 text-xs text-rose-600">{dl.msg}</p>
+                  )}
+
+                  {/* Tap prompt shown when link is ready */}
+                  {dl.phase === "ready" && (
+                    <p className="mt-1.5 text-xs text-teal-600">
+                      Your report is ready — tap <strong>Open PDF</strong> to view it.
+                    </p>
+                  )}
                 </div>
               );
             })}
