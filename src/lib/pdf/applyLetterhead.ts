@@ -6,14 +6,16 @@ import { PDFDocument } from "pdf-lib";
  * Letterhead asset: /assets/letterhead.png  (place in /public/assets/)
  *
  * Layer order per output page:
- *   1. Letterhead PNG — drawn as the full-A4 background (header + footer opaque, body transparent)
- *   2. Crystal Reports content — scaled to fit inside the letterhead's transparent content area
- *      so the opaque header/footer are never obscured by report content.
+ *   1. Crystal Reports content — scaled to fit inside the letterhead's transparent content
+ *      area and drawn first as the background.
+ *   2. Letterhead PNG — painted on top at full A4 size.  Its opaque header and footer
+ *      naturally cover any Crystal Reports margins; the transparent body reveals the
+ *      report content beneath.  This guarantees zero overlap and zero background tint.
  *
- * Content area boundaries (pre-computed from letterhead.png pixel analysis):
- *   Header separator at y=218/1865 → transparent body starts at y=220 (11.80%)
- *   Footer content starts at y=1492/1865 (80.00%)
- *   Gives ≈574 pt of visible content area on A4
+ * Content area boundaries (pre-computed from Latest_Temp.png pixel analysis):
+ *   Header content ends at row 179/1492 of the PNG → 12.20 % from top (with 3-row buffer)
+ *   Footer content starts at row 1225/1492 of the PNG → 81.90 % from top (with 3-row buffer)
+ *   Gives ≈ 587 pt of visible content area on A4
  *
  * Crystal Reports PDFs are often Letter-size (612×792 pt).  The content is scaled
  * uniformly to fill the available content-area height, then centred horizontally.
@@ -25,16 +27,15 @@ import { PDFDocument } from "pdf-lib";
 const OUT_W = 595;
 const OUT_H = 842;
 
-// Letterhead content-area boundaries (measured from letterhead.png)
-// Boundaries measured from the signed letterhead PNG (1320×1865):
-//   Header separator line: y=218 → first transparent row at y=220
-//   Footer content begins: y=1492
-const HEADER_END_FRAC = 0.1180;   // header ends at 11.80 % from top  (≈  99 pt on A4)
-const FOOTER_START_FRAC = 0.8000; // footer starts at 80.00 % from top (≈ 674 pt on A4)
+// Letterhead content-area boundaries (measured from Latest_Temp.png — 1054×1492 px)
+//   Header content ends at row 179 (+3 buffer) → 12.20 % from top
+//   Footer content begins at row 1225 (-3 buffer) → 81.90 % from top
+const HEADER_END_FRAC = 0.1220;   // header ends at 12.20 % from top  (≈ 103 pt on A4)
+const FOOTER_START_FRAC = 0.8190; // footer starts at 81.90 % from top (≈ 690 pt on A4)
 
-const CONTENT_TOP = HEADER_END_FRAC * OUT_H;      // ≈  99.3 pt from top
-const CONTENT_BOTTOM = FOOTER_START_FRAC * OUT_H;  // ≈ 673.6 pt from top
-const CONTENT_H = CONTENT_BOTTOM - CONTENT_TOP;   // ≈ 574.3 pt available
+const CONTENT_TOP = HEADER_END_FRAC * OUT_H;      // ≈ 102.7 pt from top
+const CONTENT_BOTTOM = FOOTER_START_FRAC * OUT_H;  // ≈ 689.6 pt from top
+const CONTENT_H = CONTENT_BOTTOM - CONTENT_TOP;   // ≈ 586.9 pt available
 
 export async function applyLetterhead(
   sourceFile: File
@@ -78,11 +79,12 @@ export async function applyLetterhead(
 
     const page = outDoc.addPage([OUT_W, OUT_H]);
 
-    // Layer 1 — Letterhead (background); content area is transparent
-    page.drawImage(letterheadImg, { x: 0, y: 0, width: OUT_W, height: OUT_H });
-
-    // Layer 2 — Crystal Reports content (scaled, sits entirely within content area)
+    // Layer 1 — Crystal Reports content (background, scaled to sit within the content area)
     page.drawPage(embeddedPage, { x: drawX, y: drawY, width: drawW, height: drawH });
+
+    // Layer 2 — Letterhead on top (opaque header + footer cover CR margins;
+    //           transparent body reveals CR content — no overlap, no tint)
+    page.drawImage(letterheadImg, { x: 0, y: 0, width: OUT_W, height: OUT_H });
   }
 
   const outBytes = await outDoc.save();
