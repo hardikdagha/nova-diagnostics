@@ -11,8 +11,9 @@ import { PDFDocument } from "pdf-lib";
  *      so the opaque header/footer are never obscured by report content.
  *
  * Content area boundaries (pre-computed from letterhead.png pixel analysis):
- *   Header ends at 17.16 % from top  → 144.5 pt on A4
- *   Footer starts at 83.69 % from top → 704.7 pt on A4
+ *   Header separator at y=218/1865 → transparent body starts at y=220 (11.80%)
+ *   Footer content starts at y=1492/1865 (80.00%)
+ *   Gives ≈574 pt of visible content area on A4
  *
  * Crystal Reports PDFs are often Letter-size (612×792 pt).  The content is scaled
  * uniformly to fill the available content-area height, then centred horizontally.
@@ -25,12 +26,15 @@ const OUT_W = 595;
 const OUT_H = 842;
 
 // Letterhead content-area boundaries (measured from letterhead.png)
-const HEADER_END_FRAC = 0.1716;   // header ends at 17.16 % from top
-const FOOTER_START_FRAC = 0.8369; // footer starts at 83.69 % from top
+// Boundaries measured from the signed letterhead PNG (1320×1865):
+//   Header separator line: y=218 → first transparent row at y=220
+//   Footer content begins: y=1492
+const HEADER_END_FRAC = 0.1180;   // header ends at 11.80 % from top  (≈  99 pt on A4)
+const FOOTER_START_FRAC = 0.8000; // footer starts at 80.00 % from top (≈ 674 pt on A4)
 
-const CONTENT_TOP = HEADER_END_FRAC * OUT_H;    // ≈ 144.5 pt from top
-const CONTENT_BOTTOM = FOOTER_START_FRAC * OUT_H; // ≈ 704.7 pt from top
-const CONTENT_H = CONTENT_BOTTOM - CONTENT_TOP;  // ≈ 560.2 pt available
+const CONTENT_TOP = HEADER_END_FRAC * OUT_H;      // ≈  99.3 pt from top
+const CONTENT_BOTTOM = FOOTER_START_FRAC * OUT_H;  // ≈ 673.6 pt from top
+const CONTENT_H = CONTENT_BOTTOM - CONTENT_TOP;   // ≈ 574.3 pt available
 
 export async function applyLetterhead(
   sourceFile: File
