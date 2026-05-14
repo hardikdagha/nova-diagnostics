@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
-import { CheckCircle, Copy, FileUp } from "lucide-react";
+import { applyLetterhead } from "@/lib/pdf/applyLetterhead";
+import { CheckCircle, Copy, FileUp, Layers } from "lucide-react";
 import { inputClass, labelClass, errorClass } from "@/components/forms/formStyles";
 
 function generateReportNumber() {
@@ -42,6 +43,9 @@ export default function UploadReportPage() {
     reportDate: new Date().toISOString().split("T")[0],
   });
   const [file, setFile] = useState<File | null>(null);
+  const [processedFile, setProcessedFile] = useState<File | null>(null);
+  const [processingPdf, setProcessingPdf] = useState(false);
+  const [letterheadApplied, setLetterheadApplied] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<{
@@ -55,10 +59,32 @@ export default function UploadReportPage() {
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files?.[0] ?? null;
+    setFile(selected);
+    setProcessedFile(null);
+    setLetterheadApplied(false);
+    if (!selected) return;
+
+    setProcessingPdf(true);
+    try {
+      const { file: out, applied } = await applyLetterhead(selected);
+      setProcessedFile(out);
+      setLetterheadApplied(applied);
+    } catch {
+      // Processing failed — fall back to original
+      setProcessedFile(selected);
+    } finally {
+      setProcessingPdf(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file) { setError("Please select a PDF file."); return; }
-    if (file.size > 52_428_800) { setError("File must be under 50 MB."); return; }
+    const uploadFile = processedFile ?? file;
+    if (!uploadFile) { setError("Please select a PDF file."); return; }
+    if (processingPdf) { setError("Please wait — PDF is still being processed."); return; }
+    if (uploadFile.size > 52_428_800) { setError("File must be under 50 MB."); return; }
     setLoading(true);
     setError("");
 
@@ -70,10 +96,10 @@ export default function UploadReportPage() {
       const { raw: token, hash: tokenHash } = await generateToken();
 
       // Upload PDF to private storage
-      const filePath = `${reportNumber}/${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+      const filePath = `${reportNumber}/${uploadFile.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
       const { error: uploadError } = await supabase.storage
         .from("reports")
-        .upload(filePath, file, { contentType: "application/pdf", upsert: false });
+        .upload(filePath, uploadFile, { contentType: "application/pdf", upsert: false });
 
       if (uploadError) throw new Error(`Upload failed: ${uploadError.message}`);
 
@@ -170,7 +196,7 @@ export default function UploadReportPage() {
 
         <div className="flex gap-3">
           <button
-            onClick={() => { setResult(null); setForm({ patientName: "", patientMobile: "", patientEmail: "", testName: "", reportDate: new Date().toISOString().split("T")[0] }); setFile(null); }}
+            onClick={() => { setResult(null); setForm({ patientName: "", patientMobile: "", patientEmail: "", testName: "", reportDate: new Date().toISOString().split("T")[0] }); setFile(null); setProcessedFile(null); setLetterheadApplied(false); }}
             className="btn-secondary flex-1 text-sm"
           >
             Upload another
@@ -216,7 +242,7 @@ export default function UploadReportPage() {
         {/* File upload */}
         <div>
           <label className={labelClass}>Report PDF *</label>
-          <label className="mt-1.5 flex cursor-pointer flex-col items-center gap-2 rounded-[8px] border-2 border-dashed border-slate-200 bg-slate-50 px-4 py-6 transition hover:border-teal-400 hover:bg-teal-50">
+          <label className={`mt-1.5 flex cursor-pointer flex-col items-center gap-2 rounded-[8px] border-2 border-dashed px-4 py-6 transition ${letterheadApplied ? "border-teal-300 bg-teal-50" : "border-slate-200 bg-slate-50 hover:border-teal-400 hover:bg-teal-50"}`}>
             <FileUp className="size-7 text-slate-400" />
             {file ? (
               <span className="text-sm font-medium text-slate-700">{file.name}</span>
@@ -227,15 +253,35 @@ export default function UploadReportPage() {
               type="file"
               accept="application/pdf"
               className="hidden"
-              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              onChange={handleFileChange}
             />
           </label>
+
+          {/* Letterhead processing status */}
+          {processingPdf && (
+            <p className="mt-2 flex items-center gap-2 text-xs text-slate-500">
+              <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-slate-300 border-t-slate-600" />
+              Applying Nova letterhead…
+            </p>
+          )}
+          {!processingPdf && letterheadApplied && (
+            <p className="mt-2 flex items-center gap-2 text-xs font-medium text-teal-700">
+              <Layers className="size-3.5 shrink-0" />
+              Nova letterhead applied — final PDF ready to upload
+            </p>
+          )}
+          {!processingPdf && file && !letterheadApplied && processedFile && (
+            <p className="mt-2 text-xs text-slate-400">
+              Letterhead not configured — uploading original PDF.{" "}
+              <span className="text-slate-500">Add <code className="font-mono">/public/assets/letterhead.png</code> to enable overlay.</span>
+            </p>
+          )}
         </div>
 
         {error && <p className={errorClass}>{error}</p>}
 
-        <button type="submit" disabled={loading} className="btn-primary w-full disabled:opacity-60">
-          {loading ? "Uploading…" : "Upload & Generate Link"}
+        <button type="submit" disabled={loading || processingPdf} className="btn-primary w-full disabled:opacity-60">
+          {loading ? "Uploading…" : processingPdf ? "Processing PDF…" : "Upload & Generate Link"}
         </button>
       </form>
     </div>
