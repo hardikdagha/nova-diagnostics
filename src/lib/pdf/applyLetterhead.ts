@@ -1,4 +1,4 @@
-import { PDFDocument } from "pdf-lib";
+import { PDFDocument, rgb } from "pdf-lib";
 
 /**
  * Composites every page of the source PDF onto the Nova Diagnostics letterhead.
@@ -6,8 +6,11 @@ import { PDFDocument } from "pdf-lib";
  * Letterhead asset: /assets/letterhead.png  (place in /public/assets/)
  *
  * Layer order per output page:
+ *   0. Solid white rectangle — fills the entire A4 page so the output PDF has no
+ *      transparent pixels.  Without this, PDF viewers render transparency as a
+ *      gray checkerboard pattern in both the header and footer zones.
  *   1. Crystal Reports content — scaled to fit inside the letterhead's transparent content
- *      area and drawn first as the background.
+ *      area and drawn on top of the white background.
  *   2. Letterhead PNG — painted on top at full A4 size.  Its opaque header and footer
  *      naturally cover any Crystal Reports margins; the transparent body reveals the
  *      report content beneath.  This guarantees zero overlap and zero background tint.
@@ -79,7 +82,11 @@ export async function applyLetterhead(
 
     const page = outDoc.addPage([OUT_W, OUT_H]);
 
-    // Layer 1 — Crystal Reports content (background, scaled to sit within the content area)
+    // Layer 0 — solid white background; prevents the PDF transparency
+    //           from rendering as a gray checkerboard in viewers/printers
+    page.drawRectangle({ x: 0, y: 0, width: OUT_W, height: OUT_H, color: rgb(1, 1, 1) });
+
+    // Layer 1 — Crystal Reports content (scaled to sit within the content area)
     page.drawPage(embeddedPage, { x: drawX, y: drawY, width: drawW, height: drawH });
 
     // Layer 2 — Letterhead on top (opaque header + footer cover CR margins;
