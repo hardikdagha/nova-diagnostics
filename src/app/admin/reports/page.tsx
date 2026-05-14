@@ -6,7 +6,7 @@ import { supabase } from "@/lib/supabase/client";
 import type { Report } from "@/lib/supabase/types";
 import {
   AlertTriangle, ArrowLeft, CheckCircle, Copy, Download,
-  ExternalLink, Eye, Link2, Link2Off, Plus, RefreshCw, Search, XCircle,
+  ExternalLink, Eye, Link2, Link2Off, Mail, Plus, RefreshCw, Search, XCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { inputClass } from "@/components/forms/formStyles";
@@ -47,6 +47,7 @@ function AdminReportsContent() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [emailState, setEmailState] = useState<"idle" | "sending" | "sent" | "error">("idle");
   // newToken holds the raw token after a regeneration action in this session.
   // selected.token holds the persisted token from DB (available for all reports
   // once they have been uploaded/regenerated with the new schema).
@@ -116,6 +117,44 @@ function AdminReportsContent() {
     await (supabase as any).from("reports").update({ status: "revoked", revoked_at: new Date().toISOString() }).eq("id", selected.id);
     await load();
     setActionLoading(false);
+  };
+
+  const handleSendEmail = async () => {
+    if (!selected || !selected.patient_email || !activeToken) return;
+    setEmailState("sending");
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/send-report-email`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            Authorization: `Bearer ${session?.access_token}`,
+          },
+          body: JSON.stringify({
+            patientEmail: selected.patient_email,
+            patientName: selected.patient_name,
+            reportNumber: selected.report_number,
+            reportUrl: `https://novadiagnosticslab.com/r/?t=${activeToken}`,
+          }),
+        }
+      );
+      const json = await res.json();
+      if (json.success) {
+        setEmailState("sent");
+        setTimeout(() => setEmailState("idle"), 5000);
+      } else {
+        console.error("send-report-email:", json);
+        setEmailState("error");
+        setTimeout(() => setEmailState("idle"), 5000);
+      }
+    } catch (err) {
+      console.error("send-report-email fetch error:", err);
+      setEmailState("error");
+      setTimeout(() => setEmailState("idle"), 5000);
+    }
   };
 
   const regenerateLink = async () => {
@@ -195,14 +234,49 @@ function AdminReportsContent() {
             <pre className="whitespace-pre-wrap break-all px-5 py-4 text-sm leading-7 text-slate-700">
               {buildMessage(selected, activeToken)}
             </pre>
-            <div className="border-t border-slate-100 px-5 py-3">
+            <div className="border-t border-slate-100 px-5 py-4 space-y-3">
+              {/* WhatsApp copy */}
               <button onClick={copyMessage} className="btn-primary w-full gap-2">
                 {copied ? <CheckCircle className="size-4" /> : <Copy className="size-4" />}
                 {copied ? "Copied!" : "Copy WhatsApp Message"}
               </button>
-              <p className="mt-2 text-center text-xs text-slate-400">
-                Send this message to the patient via WhatsApp.
-              </p>
+
+              {/* Send Email — only when patient email is on file */}
+              {selected.patient_email ? (
+                <div>
+                  <button
+                    onClick={handleSendEmail}
+                    disabled={emailState === "sending" || emailState === "sent"}
+                    className={`w-full gap-2 rounded-[8px] border px-4 py-2.5 text-sm font-semibold flex items-center justify-center transition-colors disabled:opacity-60 ${
+                      emailState === "sent"
+                        ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                        : emailState === "error"
+                        ? "border-rose-200 bg-rose-50 text-rose-600"
+                        : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                    }`}
+                  >
+                    {emailState === "sending" ? (
+                      <>
+                        <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-600" />
+                        Sending…
+                      </>
+                    ) : emailState === "sent" ? (
+                      <><CheckCircle className="size-4" /> Email Sent!</>
+                    ) : emailState === "error" ? (
+                      <><AlertTriangle className="size-4" /> Failed — Try Again</>
+                    ) : (
+                      <><Mail className="size-4" /> Send Email to Patient</>
+                    )}
+                  </button>
+                  <p className="mt-1.5 text-center text-xs text-slate-400">
+                    Sends to <span className="font-medium text-slate-600">{selected.patient_email}</span> from contact@novadiagnosticslab.com
+                  </p>
+                </div>
+              ) : (
+                <p className="text-center text-xs text-slate-400">
+                  No email on file — email delivery not available for this report.
+                </p>
+              )}
             </div>
           </div>
         ) : (
