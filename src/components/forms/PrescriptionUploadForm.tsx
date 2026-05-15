@@ -80,7 +80,10 @@ export function PrescriptionUploadForm() {
         .from("prescriptions")
         .upload(fileName, file, { contentType: file.type, upsert: false });
 
-      if (uploadError) throw new Error("File upload failed. Please try again.");
+      if (uploadError) {
+        console.error("[PrescriptionUploadForm] Storage upload error:", uploadError.message, uploadError);
+        throw new Error(`File upload failed: ${uploadError.message}`);
+      }
 
       const { error: insertError } = await supabase
         .from("prescription_requests")
@@ -94,6 +97,7 @@ export function PrescriptionUploadForm() {
         });
 
       if (insertError) {
+        console.error("[PrescriptionUploadForm] Supabase insert error:", insertError.code, insertError.message, insertError.details);
         // Clean up uploaded file on insert failure
         await supabase.storage.from("prescriptions").remove([uploadData.path]);
         throw insertError;
@@ -103,8 +107,9 @@ export function PrescriptionUploadForm() {
       setFile(null);
       setForm(initialState);
       if (fileInputRef.current) fileInputRef.current.value = "";
-    } catch {
-      setError("Something went wrong. Please try again or call us directly.");
+    } catch (err) {
+      console.error("[PrescriptionUploadForm] Submit failed:", err);
+      setError("Something went wrong. Please try again or call us directly at +91 8433706778.");
     } finally {
       setSubmitting(false);
     }

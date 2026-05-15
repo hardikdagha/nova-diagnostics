@@ -10,6 +10,7 @@ import { errorClass, inputClass, labelClass } from "./formStyles";
 type FormState = {
   name: string;
   mobile: string;
+  email: string;
   reason: string;
   message: string;
   consent: boolean;
@@ -18,6 +19,7 @@ type FormState = {
 const initialState: FormState = {
   name: "",
   mobile: "",
+  email: "",
   reason: bookingReasons[0],
   message: "",
   consent: false,
@@ -43,6 +45,11 @@ export function ContactForm() {
       return;
     }
 
+    if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
     if (!form.consent) {
       setError("Please confirm consent before submitting.");
       return;
@@ -55,16 +62,21 @@ export function ContactForm() {
         .insert({
           full_name: form.name.trim(),
           mobile: form.mobile.replace(/\D/g, "").slice(-10),
+          email: form.email.trim() || null,
           inquiry_type: form.reason,
           message: form.message.trim() || null,
         });
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        console.error("[ContactForm] Supabase insert error:", insertError.code, insertError.message, insertError.details);
+        throw insertError;
+      }
 
       setSuccess(true);
       setForm(initialState);
-    } catch {
-      setError("Something went wrong. Please try again or call us directly.");
+    } catch (err) {
+      console.error("[ContactForm] Submit failed:", err);
+      setError("Something went wrong. Please try again or call us directly at +91 8433706778.");
     } finally {
       setSubmitting(false);
     }
@@ -100,6 +112,20 @@ export function ContactForm() {
           />
         </label>
       </div>
+      <label className="space-y-2">
+        <span className={labelClass}>
+          Email <span className="font-normal text-slate-400">(optional)</span>
+        </span>
+        <input
+          className={inputClass}
+          type="email"
+          value={form.email}
+          onChange={(event) => setForm({ ...form, email: event.target.value })}
+          placeholder="you@example.com"
+          autoComplete="email"
+          inputMode="email"
+        />
+      </label>
       <label className="space-y-2">
         <span className={labelClass}>Reason</span>
         <select

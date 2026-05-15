@@ -12,6 +12,7 @@ const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5 MB
 type FormState = {
   name: string;
   mobile: string;
+  email: string;
   area: string;
   preferredDate: string;
   preferredTime: string;
@@ -23,6 +24,7 @@ type FormState = {
 const initialState: FormState = {
   name: "",
   mobile: "",
+  email: "",
   area: "",
   preferredDate: "",
   preferredTime: "Morning",
@@ -67,6 +69,10 @@ export function HomeCollectionForm() {
 
     if (!form.name.trim()) { setError("Please enter your full name."); return; }
     if (!isValidIndianMobile(form.mobile)) { setError("Please enter a valid Indian mobile number."); return; }
+    if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
     if (!form.area.trim()) { setError("Please enter your area or location."); return; }
     if (!form.consent) { setError("Please confirm consent before submitting."); return; }
 
@@ -83,7 +89,10 @@ export function HomeCollectionForm() {
           .from("home-collection-prescriptions")
           .upload(fileName, file, { contentType: file.type, upsert: false });
 
-        if (uploadError) throw new Error("File upload failed. Please try again.");
+        if (uploadError) {
+          console.error("[HomeCollectionForm] Storage upload error:", uploadError.message, uploadError);
+          throw new Error(`File upload failed: ${uploadError.message}`);
+        }
         prescriptionFilePath = uploadData.path;
       }
 
@@ -92,6 +101,7 @@ export function HomeCollectionForm() {
         .insert({
           full_name: form.name.trim(),
           mobile: form.mobile.replace(/\D/g, "").slice(-10),
+          email: form.email.trim() || null,
           area_location: form.area.trim(),
           preferred_date: form.preferredDate || null,
           preferred_time_slot: form.preferredTime,
@@ -101,6 +111,7 @@ export function HomeCollectionForm() {
         });
 
       if (insertError) {
+        console.error("[HomeCollectionForm] Supabase insert error:", insertError.code, insertError.message, insertError.details);
         // Clean up uploaded file on insert failure
         if (prescriptionFilePath) {
           await supabase.storage
@@ -114,8 +125,9 @@ export function HomeCollectionForm() {
       setFile(null);
       setForm(initialState);
       if (fileInputRef.current) fileInputRef.current.value = "";
-    } catch {
-      setError("Something went wrong. Please try again or call us directly.");
+    } catch (err) {
+      console.error("[HomeCollectionForm] Submit failed:", err);
+      setError("Something went wrong. Please try again or call us directly at +91 8433706778.");
     } finally {
       setSubmitting(false);
     }
@@ -151,6 +163,20 @@ export function HomeCollectionForm() {
           />
         </label>
       </div>
+      <label className="space-y-2">
+        <span className={labelClass}>
+          Email <span className="font-normal text-slate-400">(optional — for appointment confirmation)</span>
+        </span>
+        <input
+          className={inputClass}
+          type="email"
+          value={form.email}
+          onChange={(event) => setForm({ ...form, email: event.target.value })}
+          placeholder="you@example.com"
+          autoComplete="email"
+          inputMode="email"
+        />
+      </label>
       <label className="space-y-2">
         <span className={labelClass}>Area/location</span>
         <input

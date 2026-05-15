@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import { applyLetterhead } from "@/lib/pdf/applyLetterhead";
@@ -63,7 +63,7 @@ export default function UploadReportPage() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  async function searchPatients(query: string) {
+  const searchPatients = useCallback(async (query: string) => {
     const q = query.trim();
     if (q.length < 2) { setSuggestions([]); setShowSuggestions(false); return; }
     const { data } = await supabase
@@ -73,7 +73,7 @@ export default function UploadReportPage() {
       .limit(6);
     setSuggestions(data ?? []);
     setShowSuggestions(true);
-  }
+  }, []);
 
   function selectPatient(p: Patient) {
     setSelectedPatientId(p.id);
@@ -93,15 +93,14 @@ export default function UploadReportPage() {
   }
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setForm((f) => ({ ...f, [k]: value }));
-    // Clear autocomplete selection on manual edit
+    setForm((f) => ({ ...f, [k]: e.target.value }));
     if (selectedPatientId) setSelectedPatientId(null);
-    // Debounced patient search on name or mobile change
-    if (k === "patientName" || k === "patientMobile") {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-      debounceRef.current = setTimeout(() => searchPatients(value), 280);
-    }
+  };
+
+  // Debounced search — only called from onChange of name/mobile inputs (event handlers, not render)
+  const triggerSearch = (value: string) => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => void searchPatients(value), 280);
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -292,7 +291,7 @@ export default function UploadReportPage() {
                   className={inputClass}
                   required
                   value={form.patientName}
-                  onChange={set("patientName")}
+                  onChange={(e) => { set("patientName")(e); triggerSearch(e.target.value); }}
                   onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
                   onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
                   placeholder="e.g. Rahul Sharma"
@@ -327,7 +326,7 @@ export default function UploadReportPage() {
               className={`${inputClass} mt-1.5`}
               required
               value={form.patientMobile}
-              onChange={set("patientMobile")}
+              onChange={(e) => { set("patientMobile")(e); triggerSearch(e.target.value); }}
               onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
               placeholder="9876543210"
               maxLength={10}
