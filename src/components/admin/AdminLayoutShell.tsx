@@ -78,8 +78,10 @@ export default function AdminLayoutShell({ children }: { children: React.ReactNo
             <button
               className="rounded-md p-1.5 text-slate-500 hover:bg-slate-100 md:hidden"
               onClick={() => setMenuOpen(!menuOpen)}
+              aria-label={menuOpen ? "Close navigation menu" : "Open navigation menu"}
+              aria-expanded={menuOpen}
             >
-              {menuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+              {menuOpen ? <X className="size-5" aria-hidden="true" /> : <Menu className="size-5" aria-hidden="true" />}
             </button>
             <div className="flex items-center gap-2">
               <Activity className="size-4 text-[#061A33]" />
@@ -155,9 +157,9 @@ export default function AdminLayoutShell({ children }: { children: React.ReactNo
                 <button
                   onClick={handleSignOut}
                   className="shrink-0 rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-                  title="Sign out"
+                  aria-label="Sign out"
                 >
-                  <LogOut className="size-3.5" />
+                  <LogOut className="size-3.5" aria-hidden="true" />
                 </button>
               </div>
             )}

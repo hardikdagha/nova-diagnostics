@@ -22,6 +22,12 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
 import type { Report } from "@/lib/supabase/types";
+
+// Narrow type — only the columns we SELECT (avoids exposing token/file_path to the bundle)
+type PatientReport = Pick<
+  Report,
+  "id" | "report_number" | "patient_name" | "patient_mobile" | "test_name" | "report_date" | "status" | "download_count" | "created_at"
+>;
 import {
   CalendarCheck,
   Download,
@@ -56,7 +62,7 @@ type DlState =
 export default function PatientDashboardPage() {
   const router = useRouter();
   const [user, setUser] = useState<{ email: string; name: string } | null>(null);
-  const [reports, setReports] = useState<Report[]>([]);
+  const [reports, setReports] = useState<PatientReport[]>([]);
   const [loading, setLoading] = useState(true);
   // Per-report download state keyed by report.id
   const [dlStates, setDlStates] = useState<Record<string, DlState>>({});
@@ -77,7 +83,7 @@ export default function PatientDashboardPage() {
 
       const { data } = await supabase
         .from("reports")
-        .select("*")
+        .select("id, report_number, patient_name, patient_mobile, test_name, report_date, status, download_count, created_at")
         .eq("patient_email", email)
         .eq("status", "ready")
         .order("report_date", { ascending: false });
@@ -94,7 +100,7 @@ export default function PatientDashboardPage() {
   const setDl = (id: string, state: DlState) =>
     setDlStates((prev) => ({ ...prev, [id]: state }));
 
-  const handleGetLink = async (report: Report) => {
+  const handleGetLink = async (report: PatientReport) => {
     const current = dlStates[report.id];
     // If a URL is already ready, nothing to do — the user just needs to tap the link.
     if (current?.phase === "loading" || current?.phase === "ready") return;

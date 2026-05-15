@@ -88,7 +88,7 @@ export function HeroSection() {
             />
             <div className="relative aspect-[16/11]">
               <Image
-                src="/images/nova-lab-hero.jpg"
+                src="/images/nova-lab-hero.webp"
                 alt="Nova Diagnostics laboratory in Vashi, Navi Mumbai"
                 fill
                 priority

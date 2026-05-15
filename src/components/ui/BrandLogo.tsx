@@ -67,7 +67,7 @@ export function BrandLogo({ variant = "header", className }: BrandLogoProps) {
       aria-label="Nova Diagnostics – Committed to Care!"
     >
       <Image
-        src="/images/nova-logo-cropped.png"
+        src="/images/nova-logo-cropped.webp"
         alt="Nova Diagnostics – Committed to Care!"
         width={2000}
         height={2000}

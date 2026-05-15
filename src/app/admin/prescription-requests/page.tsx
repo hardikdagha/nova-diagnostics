@@ -206,9 +206,10 @@ export default function PrescriptionRequestsPage() {
               </div>
               <button
                 onClick={() => setSelected(null)}
+                aria-label="Close prescription request detail"
                 className="ml-3 shrink-0 rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
               >
-                <X className="size-4" />
+                <X className="size-4" aria-hidden="true" />
               </button>
             </div>
             <div className="space-y-4 px-5 py-4 text-sm">

@@ -65,7 +65,7 @@ export default function ReportLookupPage() {
         <div className="flex h-14 items-center px-4">
           <Link href="/">
             <Image
-              src="/images/nova-logo-cropped.png"
+              src="/images/nova-logo-cropped.webp"
               alt="Nova Diagnostics"
               width={120}
               height={53}

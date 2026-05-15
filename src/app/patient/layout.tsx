@@ -18,7 +18,7 @@ export default function PatientLayout({ children }: { children: React.ReactNode 
         <div className="flex h-14 items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-2">
             <Image
-              src="/images/nova-logo-cropped.png"
+              src="/images/nova-logo-cropped.webp"
               alt="Nova Diagnostics"
               width={120}
               height={53}
