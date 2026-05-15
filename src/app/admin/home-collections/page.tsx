@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ExternalLink, FileText, MessageSquare, Phone, Search } from "lucide-react";
+import { AlertTriangle, CheckCircle, Copy, ExternalLink, FileText, Mail, MessageSquare, Phone, Search } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import type { HomeCollectionRequest } from "@/lib/supabase/types";
 
@@ -34,6 +34,17 @@ export default function HomeCollectionsPage() {
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
   const [loadingUrl, setLoadingUrl] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Appointment confirmation fields
+  const [confirmedDate, setConfirmedDate] = useState("");
+  const [confirmedTimeSlot, setConfirmedTimeSlot] = useState("");
+  const [confirmedAddress, setConfirmedAddress] = useState("");
+  const [confirmedTestPackage, setConfirmedTestPackage] = useState("");
+  const [fastingInstructions, setFastingInstructions] = useState("");
+  const [patientInstructions, setPatientInstructions] = useState("");
+  const [savingConfirmation, setSavingConfirmation] = useState(false);
+  const [emailApptState, setEmailApptState] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [waCopied, setWaCopied] = useState(false);
 
   async function load() {
     const { data } = await supabase
@@ -98,7 +109,95 @@ export default function HomeCollectionsPage() {
     setSelected(row);
     setNotes(row.staff_notes ?? "");
     setSignedUrl(null);
+    setConfirmedDate(row.confirmed_date ?? "");
+    setConfirmedTimeSlot(row.confirmed_time_slot ?? "");
+    setConfirmedAddress(row.confirmed_address ?? "");
+    setConfirmedTestPackage(row.confirmed_test_package ?? "");
+    setFastingInstructions(row.fasting_instructions ?? "");
+    setPatientInstructions(row.patient_instructions ?? "");
+    setEmailApptState("idle");
+    setWaCopied(false);
     if (row.status === "New") updateStatus(row.id, "Viewed");
+  }
+
+  async function saveConfirmation() {
+    if (!selected) return;
+    setSavingConfirmation(true);
+    const updates = {
+      confirmed_date: confirmedDate || null,
+      confirmed_time_slot: confirmedTimeSlot || null,
+      confirmed_address: confirmedAddress || null,
+      confirmed_test_package: confirmedTestPackage || null,
+      fasting_instructions: fastingInstructions || null,
+      patient_instructions: patientInstructions || null,
+    };
+    await supabase.from("home_collection_requests").update(updates).eq("id", selected.id);
+    setRows((prev) => prev.map((r) => r.id === selected.id ? { ...r, ...updates } : r));
+    setSelected((s) => s ? { ...s, ...updates } : s);
+    setSavingConfirmation(false);
+  }
+
+  function buildApptWhatsApp() {
+    if (!selected) return "";
+    const lines: string[] = [
+      `Hello ${selected.full_name}, your home sample collection appointment at Nova Diagnostics has been confirmed.`,
+      "",
+    ];
+    if (confirmedDate) lines.push(`📅 Date: ${new Date(confirmedDate).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}`);
+    if (confirmedTimeSlot) lines.push(`🕐 Time: ${confirmedTimeSlot}`);
+    if (confirmedAddress) lines.push(`📍 Address: ${confirmedAddress}`);
+    if (confirmedTestPackage) lines.push(`🔬 Tests: ${confirmedTestPackage}`);
+    if (fastingInstructions) lines.push(`⚠️ Fasting: ${fastingInstructions}`);
+    if (patientInstructions) lines.push(`ℹ️ Note: ${patientInstructions}`);
+    lines.push("", "Please be available 10 minutes before your scheduled time.", "", "Nova Diagnostics", "+91 8433706778");
+    return lines.join("\n");
+  }
+
+  async function copyWaAppt() {
+    await navigator.clipboard.writeText(buildApptWhatsApp());
+    setWaCopied(true);
+    setTimeout(() => setWaCopied(false), 3000);
+  }
+
+  async function sendApptEmail() {
+    if (!selected?.email) return;
+    setEmailApptState("sending");
+    // Save confirmation fields before sending so the edge function reads fresh data
+    const updates = {
+      confirmed_date: confirmedDate || null,
+      confirmed_time_slot: confirmedTimeSlot || null,
+      confirmed_address: confirmedAddress || null,
+      confirmed_test_package: confirmedTestPackage || null,
+      fasting_instructions: fastingInstructions || null,
+      patient_instructions: patientInstructions || null,
+    };
+    await supabase.from("home_collection_requests").update(updates).eq("id", selected.id);
+    setRows((prev) => prev.map((r) => r.id === selected.id ? { ...r, ...updates } : r));
+    setSelected((s) => s ? { ...s, ...updates } : s);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/send-home-collection-email`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({ requestId: selected.id }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setEmailApptState("sent");
+        setSelected((s) => s ? { ...s, appointment_email_sent_at: new Date().toISOString() } : s);
+        setTimeout(() => setEmailApptState("idle"), 6000);
+      } else {
+        setEmailApptState("error");
+        setTimeout(() => setEmailApptState("idle"), 6000);
+      }
+    } catch {
+      setEmailApptState("error");
+      setTimeout(() => setEmailApptState("idle"), 6000);
+    }
   }
 
   const filtered = rows.filter((r) => {
@@ -246,6 +345,128 @@ export default function HomeCollectionsPage() {
                   )}
                 </div>
               ) : null}
+
+              {/* Appointment Confirmation */}
+              <div className="space-y-2.5 rounded-lg border border-teal-100 bg-teal-50/50 p-3">
+                <p className="text-xs font-semibold uppercase tracking-wide text-teal-700">Appointment Confirmation</p>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="col-span-1">
+                    <label className="mb-0.5 block text-xs text-slate-500">Date</label>
+                    <input
+                      type="date"
+                      className="w-full rounded border border-slate-200 bg-white px-2 py-1 text-xs outline-none focus:border-teal-400"
+                      value={confirmedDate}
+                      onChange={(e) => setConfirmedDate(e.target.value)}
+                    />
+                  </div>
+                  <div className="col-span-1">
+                    <label className="mb-0.5 block text-xs text-slate-500">Time Slot</label>
+                    <input
+                      type="text"
+                      className="w-full rounded border border-slate-200 bg-white px-2 py-1 text-xs outline-none focus:border-teal-400"
+                      placeholder="e.g. 7:00–8:00 AM"
+                      value={confirmedTimeSlot}
+                      onChange={(e) => setConfirmedTimeSlot(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="mb-0.5 block text-xs text-slate-500">Collection Address</label>
+                  <textarea
+                    className="w-full rounded border border-slate-200 bg-white px-2 py-1 text-xs outline-none focus:border-teal-400"
+                    rows={2}
+                    placeholder="Full address for phlebotomist…"
+                    value={confirmedAddress}
+                    onChange={(e) => setConfirmedAddress(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-0.5 block text-xs text-slate-500">Tests / Package</label>
+                  <input
+                    type="text"
+                    className="w-full rounded border border-slate-200 bg-white px-2 py-1 text-xs outline-none focus:border-teal-400"
+                    placeholder="e.g. CBC, LFT, Blood Sugar"
+                    value={confirmedTestPackage}
+                    onChange={(e) => setConfirmedTestPackage(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-0.5 block text-xs text-slate-500">Fasting Instructions</label>
+                  <input
+                    type="text"
+                    className="w-full rounded border border-slate-200 bg-white px-2 py-1 text-xs outline-none focus:border-teal-400"
+                    placeholder="e.g. 8 hours fasting required"
+                    value={fastingInstructions}
+                    onChange={(e) => setFastingInstructions(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-0.5 block text-xs text-slate-500">Additional Instructions</label>
+                  <textarea
+                    className="w-full rounded border border-slate-200 bg-white px-2 py-1 text-xs outline-none focus:border-teal-400"
+                    rows={2}
+                    placeholder="Any other notes for patient…"
+                    value={patientInstructions}
+                    onChange={(e) => setPatientInstructions(e.target.value)}
+                  />
+                </div>
+
+                <button
+                  onClick={saveConfirmation}
+                  disabled={savingConfirmation}
+                  className="w-full rounded bg-teal-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-teal-700 disabled:opacity-60"
+                >
+                  {savingConfirmation ? "Saving…" : "Save Confirmation Details"}
+                </button>
+
+                {/* Copy WhatsApp appointment message */}
+                <button
+                  onClick={copyWaAppt}
+                  className="flex w-full items-center justify-center gap-1.5 rounded border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-100"
+                >
+                  {waCopied ? <CheckCircle className="size-3.5" /> : <Copy className="size-3.5" />}
+                  {waCopied ? "Copied!" : "Copy WhatsApp Appointment Message"}
+                </button>
+
+                {/* Send email */}
+                {selected.email ? (
+                  <div>
+                    <button
+                      onClick={sendApptEmail}
+                      disabled={emailApptState === "sending" || emailApptState === "sent"}
+                      className={`flex w-full items-center justify-center gap-1.5 rounded border px-3 py-1.5 text-xs font-semibold disabled:opacity-60 ${
+                        emailApptState === "sent"
+                          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                          : emailApptState === "error"
+                          ? "border-rose-200 bg-rose-50 text-rose-600"
+                          : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+                      }`}
+                    >
+                      {emailApptState === "sending" ? (
+                        <><span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-slate-300 border-t-slate-600" /> Sending…</>
+                      ) : emailApptState === "sent" ? (
+                        <><CheckCircle className="size-3.5" /> Email Sent!</>
+                      ) : emailApptState === "error" ? (
+                        <><AlertTriangle className="size-3.5" /> Failed — Try Again</>
+                      ) : (
+                        <><Mail className="size-3.5" /> Send Appointment Details via Email</>
+                      )}
+                    </button>
+                    {selected.appointment_email_sent_at && (
+                      <p className="mt-1 text-center text-xs text-slate-400">
+                        Last sent {new Date(selected.appointment_email_sent_at).toLocaleString("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-center text-xs text-slate-400">No email on file — email not available.</p>
+                )}
+              </div>
 
               {/* Status */}
               <div>

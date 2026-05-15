@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import { applyLetterhead } from "@/lib/pdf/applyLetterhead";
-import { CheckCircle, Copy, FileUp, Layers } from "lucide-react";
+import { CheckCircle, Copy, FileUp, Layers, UserCheck, X } from "lucide-react";
 import { inputClass, labelClass, errorClass } from "@/components/forms/formStyles";
+import type { Patient } from "@/lib/supabase/types";
 
 function generateReportNumber() {
   const year = new Date().getFullYear();
@@ -56,8 +57,52 @@ export default function UploadReportPage() {
   } | null>(null);
   const [copied, setCopied] = useState(false);
 
-  const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
-    setForm((f) => ({ ...f, [k]: e.target.value }));
+  // Patient autocomplete
+  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null);
+  const [suggestions, setSuggestions] = useState<Patient[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  async function searchPatients(query: string) {
+    const q = query.trim();
+    if (q.length < 2) { setSuggestions([]); setShowSuggestions(false); return; }
+    const { data } = await supabase
+      .from("patients")
+      .select("*")
+      .or(`full_name.ilike.%${q}%,mobile.ilike.%${q}%,normalized_mobile.ilike.%${q}%,email.ilike.%${q}%`)
+      .limit(6);
+    setSuggestions(data ?? []);
+    setShowSuggestions(true);
+  }
+
+  function selectPatient(p: Patient) {
+    setSelectedPatientId(p.id);
+    setForm((f) => ({
+      ...f,
+      patientName: p.full_name,
+      patientMobile: p.mobile,
+      patientEmail: p.email ?? "",
+    }));
+    setSuggestions([]);
+    setShowSuggestions(false);
+  }
+
+  function clearPatientSelection() {
+    setSelectedPatientId(null);
+    setForm((f) => ({ ...f, patientName: "", patientMobile: "", patientEmail: "" }));
+  }
+
+  const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setForm((f) => ({ ...f, [k]: value }));
+    // Clear autocomplete selection on manual edit
+    if (selectedPatientId) setSelectedPatientId(null);
+    // Debounced patient search on name or mobile change
+    if (k === "patientName" || k === "patientMobile") {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => searchPatients(value), 280);
+    }
+  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0] ?? null;
@@ -104,23 +149,32 @@ export default function UploadReportPage() {
       if (uploadError) throw new Error(`Upload failed: ${uploadError.message}`);
 
       // Find or create patient record
-      let patientId: string | null = null;
       const mobile = form.patientMobile.replace(/\D/g, "").slice(-10);
-      const { data: existing } = await supabase
-        .from("patients")
-        .select("id")
-        .eq("mobile", mobile)
-        .maybeSingle();
+      let patientId: string | null = selectedPatientId;
 
-      if (existing) {
-        patientId = existing.id;
-      } else {
-        const { data: newPatient } = await supabase
+      if (!patientId) {
+        const { data: existing } = await supabase
           .from("patients")
-          .insert({ full_name: form.patientName, mobile, email: form.patientEmail || null })
           .select("id")
-          .single();
-        patientId = newPatient?.id ?? null;
+          .eq("mobile", mobile)
+          .maybeSingle();
+
+        if (existing) {
+          patientId = existing.id;
+        } else {
+          const { data: newPatient } = await supabase
+            .from("patients")
+            .insert({
+              full_name: form.patientName,
+              mobile,
+              email: form.patientEmail || null,
+              normalized_mobile: mobile,
+              source: "report_upload",
+            })
+            .select("id")
+            .single();
+          patientId = newPatient?.id ?? null;
+        }
       }
 
       // Insert report — select id so we can link to the detail page
@@ -219,15 +273,77 @@ export default function UploadReportPage() {
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2">
             <label className={labelClass}>Patient full name *</label>
-            <input className={`${inputClass} mt-1.5`} required value={form.patientName} onChange={set("patientName")} placeholder="e.g. Rahul Sharma" />
+            <div className="relative mt-1.5">
+              {selectedPatientId ? (
+                <div className="flex items-center gap-2 rounded-[8px] border border-teal-300 bg-teal-50 px-3 py-2.5">
+                  <UserCheck className="size-4 shrink-0 text-teal-600" />
+                  <span className="flex-1 text-sm font-medium text-teal-800">{form.patientName}</span>
+                  <button
+                    type="button"
+                    onClick={clearPatientSelection}
+                    className="text-teal-500 hover:text-teal-700"
+                    title="Clear selection"
+                  >
+                    <X className="size-4" />
+                  </button>
+                </div>
+              ) : (
+                <input
+                  className={inputClass}
+                  required
+                  value={form.patientName}
+                  onChange={set("patientName")}
+                  onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                  placeholder="e.g. Rahul Sharma"
+                  autoComplete="off"
+                />
+              )}
+
+              {/* Suggestions dropdown */}
+              {showSuggestions && suggestions.length > 0 && !selectedPatientId && (
+                <div className="absolute left-0 right-0 top-full z-10 mt-1 overflow-hidden rounded-[8px] border border-slate-200 bg-white shadow-lg">
+                  {suggestions.map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onMouseDown={() => selectPatient(p)}
+                      className="flex w-full items-start gap-3 px-3 py-2.5 text-left hover:bg-teal-50"
+                    >
+                      <UserCheck className="mt-0.5 size-4 shrink-0 text-teal-500" />
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-slate-900">{p.full_name}</p>
+                        <p className="text-xs text-slate-400">{p.mobile}{p.email ? ` · ${p.email}` : ""}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
           <div>
             <label className={labelClass}>Mobile number *</label>
-            <input className={`${inputClass} mt-1.5`} required value={form.patientMobile} onChange={set("patientMobile")} placeholder="9876543210" maxLength={10} />
+            <input
+              className={`${inputClass} mt-1.5`}
+              required
+              value={form.patientMobile}
+              onChange={set("patientMobile")}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+              placeholder="9876543210"
+              maxLength={10}
+              readOnly={!!selectedPatientId}
+            />
           </div>
           <div>
             <label className={labelClass}>Email <span className="font-normal text-slate-400">(optional)</span></label>
-            <input className={`${inputClass} mt-1.5`} type="email" value={form.patientEmail} onChange={set("patientEmail")} placeholder="patient@email.com" />
+            <input
+              className={`${inputClass} mt-1.5`}
+              type="email"
+              value={form.patientEmail}
+              onChange={set("patientEmail")}
+              placeholder="patient@email.com"
+              readOnly={!!selectedPatientId}
+            />
           </div>
           <div className="sm:col-span-2">
             <label className={labelClass}>Test name *</label>

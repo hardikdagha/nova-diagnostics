@@ -6,7 +6,7 @@ import { supabase } from "@/lib/supabase/client";
 import type { Report } from "@/lib/supabase/types";
 import {
   AlertTriangle, ArrowLeft, CheckCircle, Copy, Download,
-  ExternalLink, Eye, Link2, Link2Off, Mail, Plus, RefreshCw,
+  ExternalLink, Eye, Link2, Link2Off, Mail, MessageSquare, Plus, RefreshCw,
   Search, Trash2, XCircle,
 } from "lucide-react";
 import Link from "next/link";
@@ -99,6 +99,12 @@ function AdminReportsContent() {
   const buildMessage = (r: Report, token: string) => {
     const url = `https://novadiagnosticslab.com/r/?t=${token}`;
     return `Hello ${r.patient_name}, your report from Nova Diagnostics is ready.\n\nReport No: ${r.report_number}\n\nDownload report:\n${url}\n\nNova Diagnostics\n+91 8433706778`;
+  };
+
+  const normalizeWhatsApp = (mobile: string) => {
+    const digits = mobile.replace(/\D/g, "");
+    const last10 = digits.slice(-10);
+    return last10.length === 10 ? `91${last10}` : null;
   };
 
   const copyMessage = async () => {
@@ -281,6 +287,26 @@ function AdminReportsContent() {
                 {copied ? <CheckCircle className="size-4" /> : <Copy className="size-4" />}
                 {copied ? "Copied!" : "Copy WhatsApp Message"}
               </button>
+
+              {/* Send WhatsApp to Patient */}
+              {(() => {
+                const wa = normalizeWhatsApp(selected.patient_mobile);
+                const msg = buildMessage(selected, activeToken!);
+                return wa ? (
+                  <a
+                    href={`https://wa.me/${wa}?text=${encodeURIComponent(msg)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex w-full items-center justify-center gap-2 rounded-[8px] border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700 hover:bg-emerald-100"
+                  >
+                    <MessageSquare className="size-4" /> Send WhatsApp to Patient
+                  </a>
+                ) : (
+                  <p className="text-center text-xs text-slate-400">
+                    Mobile number invalid — WhatsApp not available.
+                  </p>
+                );
+              })()}
 
               {/* Send Email */}
               {selected.patient_email ? (
