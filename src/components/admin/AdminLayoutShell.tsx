@@ -67,6 +67,8 @@ export default function AdminLayoutShell({ children }: { children: React.ReactNo
     );
   }
 
+  const emailInitial = staffEmail ? staffEmail[0].toUpperCase() : "S";
+
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Top bar */}
@@ -79,14 +81,22 @@ export default function AdminLayoutShell({ children }: { children: React.ReactNo
             >
               {menuOpen ? <X className="size-5" /> : <Menu className="size-5" />}
             </button>
-            <span className="font-semibold text-[#061A33]">Nova Diagnostics</span>
-            <span className="hidden rounded bg-[#061A33]/10 px-2 py-0.5 text-xs font-semibold text-[#061A33] sm:inline">
+            <div className="flex items-center gap-2">
+              <Activity className="size-4 text-[#061A33]" />
+              <span className="font-semibold text-[#061A33]">Nova Diagnostics</span>
+            </div>
+            <span className="hidden rounded bg-[#061A33]/8 px-2 py-0.5 text-[11px] font-semibold text-[#061A33] sm:inline">
               Staff Portal
             </span>
           </div>
           <div className="flex items-center gap-3">
             {staffEmail && (
-              <span className="hidden text-xs text-slate-500 sm:inline">{staffEmail}</span>
+              <>
+                <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[#061A33] text-xs font-bold text-white">
+                  {emailInitial}
+                </div>
+                <span className="hidden text-xs text-slate-500 sm:inline">{staffEmail}</span>
+              </>
             )}
             <button
               onClick={handleSignOut}
@@ -121,7 +131,7 @@ export default function AdminLayoutShell({ children }: { children: React.ReactNo
 
       <div className="flex">
         {/* Sidebar — desktop */}
-        <aside className="hidden w-56 shrink-0 border-r border-slate-200 bg-white md:flex md:flex-col">
+        <aside className="sticky top-14 hidden h-[calc(100vh-3.5rem)] w-60 shrink-0 flex-col overflow-y-auto border-r border-slate-200 bg-white md:flex">
           <nav className="flex flex-col gap-1 p-3 pt-4">
             {NAV.map(({ href, label, icon: Icon }) => (
               <Link
@@ -129,8 +139,8 @@ export default function AdminLayoutShell({ children }: { children: React.ReactNo
                 href={href}
                 className={`flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
                   pathname?.startsWith(href)
-                    ? "bg-[#061A33] text-white"
-                    : "text-slate-600 hover:bg-slate-100"
+                    ? "bg-[#061A33] text-white shadow-sm"
+                    : "text-slate-600 hover:bg-[#061A33]/5 hover:text-[#061A33]"
                 }`}
               >
                 <Icon className="size-4" />
@@ -138,10 +148,24 @@ export default function AdminLayoutShell({ children }: { children: React.ReactNo
               </Link>
             ))}
           </nav>
+          <div className="mt-auto border-t border-slate-100 p-3">
+            {staffEmail && (
+              <div className="flex items-center justify-between gap-2">
+                <span className="truncate text-xs text-slate-400">{staffEmail}</span>
+                <button
+                  onClick={handleSignOut}
+                  className="shrink-0 rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                  title="Sign out"
+                >
+                  <LogOut className="size-3.5" />
+                </button>
+              </div>
+            )}
+          </div>
         </aside>
 
         {/* Page content */}
-        <main className="min-h-[calc(100vh-3.5rem)] flex-1 p-4 md:p-6">{children}</main>
+        <main className="min-h-[calc(100vh-3.5rem)] flex-1 overflow-auto p-5 md:p-6">{children}</main>
       </div>
     </div>
   );

@@ -6,7 +6,7 @@ import { supabase } from "@/lib/supabase/client";
 import type { Report } from "@/lib/supabase/types";
 import {
   AlertTriangle, ArrowLeft, CheckCircle, Copy, Download,
-  ExternalLink, Eye, Link2, Link2Off, Mail, MessageSquare, Plus, RefreshCw,
+  ExternalLink, Eye, FileText, Link2, Link2Off, Mail, MessageSquare, Plus, RefreshCw,
   Search, Trash2, XCircle,
 } from "lucide-react";
 import Link from "next/link";
@@ -229,15 +229,16 @@ function AdminReportsContent() {
         <div className="card-premium p-6">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Report</p>
-              <h1 className="mt-0.5 text-xl font-semibold text-slate-950">{selected.report_number}</h1>
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Report</p>
+              <h1 className="mt-0.5 font-mono text-xl font-semibold text-slate-950">{selected.report_number}</h1>
             </div>
             <span className={`rounded-full px-3 py-1 text-xs font-semibold ${STATUS_CHIP[selected.status]}`}>
+              <span className="mr-1 inline-block size-1.5 rounded-full bg-current" />
               {selected.status}
             </span>
           </div>
 
-          <dl className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
+          <dl className="mt-5 grid gap-y-3 gap-x-6 text-sm sm:grid-cols-2">
             {[
               ["Patient", selected.patient_name],
               ["Mobile", selected.patient_mobile],
@@ -246,8 +247,8 @@ function AdminReportsContent() {
               ["Report Date", selected.report_date],
               ["Downloads", String(selected.download_count)],
             ].map(([k, v]) => (
-              <div key={k}>
-                <dt className="text-slate-400">{k}</dt>
+              <div key={k} className="space-y-0.5">
+                <dt className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">{k}</dt>
                 <dd className="font-medium text-slate-800">{v}</dd>
               </div>
             ))}
@@ -258,7 +259,7 @@ function AdminReportsContent() {
         {activeToken ? (
           <div className="card-premium overflow-hidden">
             <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 px-5 py-3">
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                 <Link2 className="size-3.5" />
                 {newToken ? "New link generated" : "Report link"}
               </div>
@@ -273,7 +274,7 @@ function AdminReportsContent() {
             </div>
             {/* Shareable URL */}
             <div className="border-b border-slate-50 px-5 py-3">
-              <p className="mb-1 text-xs font-semibold text-slate-400">Shareable URL</p>
+              <p className="mb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Shareable URL</p>
               <p className="break-all font-mono text-xs text-slate-700">
                 {`https://novadiagnosticslab.com/r/?t=${activeToken}`}
               </p>
@@ -422,7 +423,14 @@ function AdminReportsContent() {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold text-slate-950">Reports</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-semibold text-slate-950">Reports</h1>
+          {!loading && (
+            <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-500">
+              {filtered.length}
+            </span>
+          )}
+        </div>
         <Link href="/admin/reports/upload" className="btn-primary text-sm">
           <Plus className="size-4" /> Upload
         </Link>
@@ -444,13 +452,21 @@ function AdminReportsContent() {
           <div className="h-7 w-7 animate-spin rounded-full border-2 border-slate-300 border-t-[#061A33]" />
         </div>
       ) : filtered.length === 0 ? (
-        <div className="card-premium p-10 text-center text-sm text-slate-400">
-          {query ? "No reports match your search." : "No reports yet."}
+        <div className="card-premium flex flex-col items-center gap-3 p-12 text-center">
+          <FileText className="size-8 text-slate-200" />
+          <p className="text-sm text-slate-400">
+            {query ? "No reports match your search." : "No reports yet."}
+          </p>
         </div>
       ) : (
         <div className="card-premium divide-y divide-slate-50 overflow-hidden">
           {filtered.map((r) => (
-            <div key={r.id} className="flex w-full items-center justify-between px-5 py-4 hover:bg-slate-50">
+            <div key={r.id} className="flex w-full items-center gap-4 px-5 py-4 hover:bg-slate-50">
+              {/* File icon avatar */}
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-slate-100">
+                <FileText className="size-4 text-slate-400" />
+              </div>
+
               {/* Clickable report info */}
               <button
                 onClick={() => router.push(`/admin/reports?id=${r.id}`)}
@@ -459,16 +475,17 @@ function AdminReportsContent() {
                 <div className="flex items-center gap-2">
                   <p className="truncate font-medium text-slate-950">{r.patient_name}</p>
                   <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_CHIP[r.status]}`}>
+                    <span className="mr-1 inline-block size-1.5 rounded-full bg-current" />
                     {r.status}
                   </span>
                 </div>
-                <p className="mt-0.5 text-xs text-slate-400">
+                <p className="mt-0.5 font-mono text-xs text-slate-400">
                   {r.report_number} · {r.test_name} · {r.patient_mobile}
                 </p>
               </button>
 
               {/* Row actions */}
-              <div className="ml-4 flex shrink-0 items-center gap-3 text-xs text-slate-400">
+              <div className="ml-2 flex shrink-0 items-center gap-3 text-xs text-slate-400">
                 <span className="hidden items-center gap-1 sm:flex">
                   <Download className="size-3" />{r.download_count}
                 </span>

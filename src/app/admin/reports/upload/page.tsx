@@ -4,7 +4,7 @@ import { useCallback, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import { applyLetterhead } from "@/lib/pdf/applyLetterhead";
-import { CheckCircle, Copy, FileUp, Layers, UserCheck, X } from "lucide-react";
+import { CheckCircle, Copy, FileUp, Layers, MessageSquare, UserCheck, X } from "lucide-react";
 import { inputClass, labelClass, errorClass } from "@/components/forms/formStyles";
 import type { Patient } from "@/lib/supabase/types";
 
@@ -220,21 +220,22 @@ export default function UploadReportPage() {
     return (
       <div className="mx-auto max-w-lg space-y-5">
         <div className="card-premium p-6 text-center">
-          <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-emerald-100">
-            <CheckCircle className="size-6 text-emerald-600" />
+          <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-full bg-emerald-100">
+            <CheckCircle className="size-7 text-emerald-600" />
           </div>
           <h1 className="text-xl font-semibold text-slate-950">Report uploaded</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            Report No: <strong>{result.reportNumber}</strong>
+          <p className="mt-1 font-mono text-sm text-slate-600">
+            {result.reportNumber}
           </p>
-          <p className="mt-0.5 text-xs text-slate-400">
+          <p className="mt-1 text-xs text-slate-400">
             Share the WhatsApp message below with the patient.
           </p>
         </div>
 
         <div className="card-premium overflow-hidden">
-          <div className="border-b border-slate-100 bg-slate-50 px-5 py-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
-            WhatsApp Message
+          <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-5 py-3">
+            <MessageSquare className="size-3.5 text-slate-400" />
+            <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">WhatsApp Message</span>
           </div>
           <pre className="whitespace-pre-wrap break-all px-5 py-4 text-sm leading-7 text-slate-700">
             {result.whatsappMessage}
@@ -266,98 +267,112 @@ export default function UploadReportPage() {
 
   return (
     <div className="mx-auto max-w-lg">
-      <h1 className="mb-6 text-2xl font-semibold text-slate-950">Upload Report</h1>
+      <div className="mb-6">
+        <h1 className="text-2xl font-semibold text-slate-950">Upload Report</h1>
+        <p className="mt-0.5 text-sm text-slate-500">Create a secure patient report link</p>
+      </div>
 
-      <form onSubmit={handleSubmit} className="card-premium space-y-5 p-6">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="sm:col-span-2">
-            <label className={labelClass}>Patient full name *</label>
-            <div className="relative mt-1.5">
-              {selectedPatientId ? (
-                <div className="flex items-center gap-2 rounded-[8px] border border-teal-300 bg-teal-50 px-3 py-2.5">
-                  <UserCheck className="size-4 shrink-0 text-teal-600" />
-                  <span className="flex-1 text-sm font-medium text-teal-800">{form.patientName}</span>
-                  <button
-                    type="button"
-                    onClick={clearPatientSelection}
-                    className="text-teal-500 hover:text-teal-700"
-                    title="Clear selection"
-                  >
-                    <X className="size-4" />
-                  </button>
-                </div>
-              ) : (
-                <input
-                  className={inputClass}
-                  required
-                  value={form.patientName}
-                  onChange={(e) => { set("patientName")(e); triggerSearch(e.target.value); }}
-                  onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-                  onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
-                  placeholder="e.g. Rahul Sharma"
-                  autoComplete="off"
-                />
-              )}
-
-              {/* Suggestions dropdown */}
-              {showSuggestions && suggestions.length > 0 && !selectedPatientId && (
-                <div className="absolute left-0 right-0 top-full z-10 mt-1 overflow-hidden rounded-[8px] border border-slate-200 bg-white shadow-lg">
-                  {suggestions.map((p) => (
+      <form onSubmit={handleSubmit} className="card-premium space-y-6 p-6">
+        {/* Patient Information */}
+        <div>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400">Patient Information</p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <label className={labelClass}>Patient full name *</label>
+              <div className="relative mt-1.5">
+                {selectedPatientId ? (
+                  <div className="flex items-center gap-2 rounded-[8px] border border-teal-300 bg-teal-50 px-3 py-2.5">
+                    <UserCheck className="size-4 shrink-0 text-teal-600" />
+                    <span className="flex-1 text-sm font-medium text-teal-800">{form.patientName}</span>
                     <button
-                      key={p.id}
                       type="button"
-                      onMouseDown={() => selectPatient(p)}
-                      className="flex w-full items-start gap-3 px-3 py-2.5 text-left hover:bg-teal-50"
+                      onClick={clearPatientSelection}
+                      className="text-teal-500 hover:text-teal-700"
+                      title="Clear selection"
                     >
-                      <UserCheck className="mt-0.5 size-4 shrink-0 text-teal-500" />
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-slate-900">{p.full_name}</p>
-                        <p className="text-xs text-slate-400">{p.mobile}{p.email ? ` · ${p.email}` : ""}</p>
-                      </div>
+                      <X className="size-4" />
                     </button>
-                  ))}
-                </div>
-              )}
+                  </div>
+                ) : (
+                  <input
+                    className={inputClass}
+                    required
+                    value={form.patientName}
+                    onChange={(e) => { set("patientName")(e); triggerSearch(e.target.value); }}
+                    onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+                    onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                    placeholder="e.g. Rahul Sharma"
+                    autoComplete="off"
+                  />
+                )}
+
+                {/* Suggestions dropdown */}
+                {showSuggestions && suggestions.length > 0 && !selectedPatientId && (
+                  <div className="absolute left-0 right-0 top-full z-10 mt-1 overflow-hidden rounded-[8px] border border-slate-200 bg-white shadow-lg">
+                    {suggestions.map((p) => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onMouseDown={() => selectPatient(p)}
+                        className="flex w-full items-start gap-3 px-3 py-2.5 text-left hover:bg-teal-50"
+                      >
+                        <UserCheck className="mt-0.5 size-4 shrink-0 text-teal-500" />
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-slate-900">{p.full_name}</p>
+                          <p className="text-xs text-slate-400">{p.mobile}{p.email ? ` · ${p.email}` : ""}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-          <div>
-            <label className={labelClass}>Mobile number *</label>
-            <input
-              className={`${inputClass} mt-1.5`}
-              required
-              value={form.patientMobile}
-              onChange={(e) => { set("patientMobile")(e); triggerSearch(e.target.value); }}
-              onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
-              placeholder="9876543210"
-              maxLength={10}
-              readOnly={!!selectedPatientId}
-            />
-          </div>
-          <div>
-            <label className={labelClass}>Email <span className="font-normal text-slate-400">(optional)</span></label>
-            <input
-              className={`${inputClass} mt-1.5`}
-              type="email"
-              value={form.patientEmail}
-              onChange={set("patientEmail")}
-              placeholder="patient@email.com"
-              readOnly={!!selectedPatientId}
-            />
-          </div>
-          <div className="sm:col-span-2">
-            <label className={labelClass}>Test name *</label>
-            <input className={`${inputClass} mt-1.5`} required value={form.testName} onChange={set("testName")} placeholder="e.g. Complete Blood Count (CBC)" />
-          </div>
-          <div>
-            <label className={labelClass}>Report date *</label>
-            <input className={`${inputClass} mt-1.5`} type="date" required value={form.reportDate} onChange={set("reportDate")} />
+            <div>
+              <label className={labelClass}>Mobile number *</label>
+              <input
+                className={`${inputClass} mt-1.5`}
+                required
+                value={form.patientMobile}
+                onChange={(e) => { set("patientMobile")(e); triggerSearch(e.target.value); }}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                placeholder="9876543210"
+                maxLength={10}
+                readOnly={!!selectedPatientId}
+              />
+            </div>
+            <div>
+              <label className={labelClass}>Email <span className="font-normal text-slate-400">(optional)</span></label>
+              <input
+                className={`${inputClass} mt-1.5`}
+                type="email"
+                value={form.patientEmail}
+                onChange={set("patientEmail")}
+                placeholder="patient@email.com"
+                readOnly={!!selectedPatientId}
+              />
+            </div>
           </div>
         </div>
 
-        {/* File upload */}
+        {/* Test Details */}
         <div>
-          <label className={labelClass}>Report PDF *</label>
-          <label className={`mt-1.5 flex cursor-pointer flex-col items-center gap-2 rounded-[8px] border-2 border-dashed px-4 py-6 transition ${letterheadApplied ? "border-teal-300 bg-teal-50" : "border-slate-200 bg-slate-50 hover:border-teal-400 hover:bg-teal-50"}`}>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400">Test Details</p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <label className={labelClass}>Test name *</label>
+              <input className={`${inputClass} mt-1.5`} required value={form.testName} onChange={set("testName")} placeholder="e.g. Complete Blood Count (CBC)" />
+            </div>
+            <div>
+              <label className={labelClass}>Report date *</label>
+              <input className={`${inputClass} mt-1.5`} type="date" required value={form.reportDate} onChange={set("reportDate")} />
+            </div>
+          </div>
+        </div>
+
+        {/* Report PDF */}
+        <div>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400">Report PDF</p>
+          <label className={`flex cursor-pointer flex-col items-center gap-2 rounded-[8px] border-2 border-dashed px-4 py-6 transition ${letterheadApplied ? "border-teal-300 bg-teal-50" : "border-slate-200 bg-slate-50 hover:border-teal-400 hover:bg-teal-50"}`}>
             <FileUp className="size-7 text-slate-400" />
             {file ? (
               <span className="text-sm font-medium text-slate-700">{file.name}</span>

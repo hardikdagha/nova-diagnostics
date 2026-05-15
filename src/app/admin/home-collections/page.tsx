@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { AlertTriangle, CheckCircle, Copy, ExternalLink, FileText, Mail, MessageSquare, Phone, Search } from "lucide-react";
+import { AlertTriangle, Calendar, CheckCircle, Copy, ExternalLink, FileText, Home, Mail, MapPin, MessageSquare, Phone, Search, X } from "lucide-react";
 import { supabase } from "@/lib/supabase/client";
 import type { HomeCollectionRequest } from "@/lib/supabase/types";
 
@@ -221,13 +221,15 @@ export default function HomeCollectionsPage() {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center gap-3">
         <h1 className="text-2xl font-semibold text-slate-950">Home Collections</h1>
-        <span className="text-sm text-slate-400">{rows.length} total</span>
+        <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-500">
+          {rows.length}
+        </span>
       </div>
 
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
         <input
           className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400"
           placeholder="Search by name, mobile, or area…"
@@ -240,32 +242,56 @@ export default function HomeCollectionsPage() {
         {/* List */}
         <div className="card-premium min-w-0 flex-1 overflow-hidden">
           {filtered.length === 0 ? (
-            <p className="px-5 py-10 text-center text-sm text-slate-400">No home collection requests found.</p>
+            <div className="flex flex-col items-center gap-3 px-5 py-12 text-center">
+              <Home className="size-8 text-slate-200" />
+              <p className="text-sm text-slate-400">No home collection requests found.</p>
+            </div>
           ) : (
             <div className="divide-y divide-slate-50">
               {filtered.map((r) => {
                 const date = new Date(r.created_at).toLocaleDateString("en-IN", {
                   day: "numeric", month: "short", year: "numeric",
                 });
+                const initial = r.full_name?.[0]?.toUpperCase() ?? "?";
+                const isSelected = selected?.id === r.id;
                 return (
                   <button
                     key={r.id}
                     onClick={() => openDetail(r)}
-                    className={`w-full px-5 py-3.5 text-left transition-colors hover:bg-slate-50 ${selected?.id === r.id ? "bg-teal-50" : ""}`}
+                    className={`w-full px-5 py-3.5 text-left transition-colors hover:bg-slate-50 ${isSelected ? "border-l-2 border-[#061A33] bg-[#061A33]/5" : ""}`}
                   >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="truncate font-medium text-slate-950">{r.full_name}</p>
-                        <p className="mt-0.5 text-xs text-slate-500">
-                          {r.mobile} · {r.area_location} · {date}
-                        </p>
+                    <div className="flex items-start gap-3">
+                      <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-semibold text-slate-600">
+                        {initial}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="truncate font-medium text-slate-950">{r.full_name}</p>
+                          <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_CHIP[r.status] ?? STATUS_CHIP.Viewed}`}>
+                            <span className="mr-1 inline-block size-1.5 rounded-full bg-current" />
+                            {r.status}
+                          </span>
+                        </div>
+                        <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-slate-500">
+                          <span>{r.mobile}</span>
+                          {r.area_location && (
+                            <span className="flex items-center gap-0.5">
+                              <MapPin className="size-3" />
+                              {r.area_location}
+                            </span>
+                          )}
+                          {r.preferred_date && (
+                            <span className="flex items-center gap-0.5">
+                              <Calendar className="size-3" />
+                              {new Date(r.preferred_date).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
+                            </span>
+                          )}
+                          <span>{date}</span>
+                        </div>
                         {r.test_package_required ? (
-                          <p className="mt-0.5 text-xs text-slate-400 truncate">{r.test_package_required}</p>
+                          <p className="mt-0.5 truncate text-xs text-slate-400">{r.test_package_required}</p>
                         ) : null}
                       </div>
-                      <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_CHIP[r.status] ?? STATUS_CHIP.Viewed}`}>
-                        {r.status}
-                      </span>
                     </div>
                   </button>
                 );
@@ -276,10 +302,26 @@ export default function HomeCollectionsPage() {
 
         {/* Detail panel */}
         {selected ? (
-          <div className="card-premium hidden w-80 shrink-0 overflow-hidden lg:block">
-            <div className="border-b border-slate-100 px-5 py-4">
-              <p className="font-semibold text-slate-950">{selected.full_name}</p>
-              <p className="text-xs text-slate-500">{selected.area_location}</p>
+          <div className="card-premium hidden w-80 shrink-0 overflow-hidden lg:block xl:w-96">
+            {/* Panel header */}
+            <div className="flex items-start justify-between border-b border-slate-100 px-5 py-4">
+              <div className="min-w-0">
+                <p className="truncate font-semibold text-slate-950">{selected.full_name}</p>
+                <div className="mt-1 flex items-center gap-1 text-xs text-slate-500">
+                  <MapPin className="size-3" />
+                  <span>{selected.area_location}</span>
+                </div>
+                <span className={`mt-1 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_CHIP[selected.status] ?? STATUS_CHIP.Viewed}`}>
+                  <span className="mr-1 inline-block size-1.5 rounded-full bg-current" />
+                  {selected.status}
+                </span>
+              </div>
+              <button
+                onClick={() => setSelected(null)}
+                className="ml-3 shrink-0 rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+              >
+                <X className="size-4" />
+              </button>
             </div>
             <div className="space-y-4 px-5 py-4 text-sm">
               {/* Contact buttons */}
@@ -291,39 +333,62 @@ export default function HomeCollectionsPage() {
                   href={`https://wa.me/91${selected.mobile.replace(/\D/g, "").slice(-10)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn-primary flex-1 justify-center gap-1.5 text-xs"
+                  className="flex flex-1 items-center justify-center gap-1.5 rounded-[8px] bg-emerald-600 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-700"
                 >
                   <MessageSquare className="size-3.5" /> WhatsApp
                 </a>
               </div>
 
               {/* Info */}
-              <div className="space-y-1.5 text-xs text-slate-600">
-                <p><span className="font-medium text-slate-900">Mobile:</span> {selected.mobile}</p>
-                {selected.email ? <p><span className="font-medium text-slate-900">Email:</span> {selected.email}</p> : null}
-                <p><span className="font-medium text-slate-900">Area:</span> {selected.area_location}</p>
+              <dl className="space-y-2 text-xs">
+                <div className="grid grid-cols-[6rem_1fr] gap-1">
+                  <dt className="font-semibold text-slate-500">Mobile</dt>
+                  <dd className="text-slate-700">{selected.mobile}</dd>
+                </div>
+                {selected.email ? (
+                  <div className="grid grid-cols-[6rem_1fr] gap-1">
+                    <dt className="font-semibold text-slate-500">Email</dt>
+                    <dd className="break-all text-slate-700">{selected.email}</dd>
+                  </div>
+                ) : null}
+                <div className="grid grid-cols-[6rem_1fr] gap-1">
+                  <dt className="font-semibold text-slate-500">Area</dt>
+                  <dd className="text-slate-700">{selected.area_location}</dd>
+                </div>
                 {selected.preferred_date ? (
-                  <p><span className="font-medium text-slate-900">Date:</span> {new Date(selected.preferred_date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</p>
+                  <div className="grid grid-cols-[6rem_1fr] gap-1">
+                    <dt className="font-semibold text-slate-500">Pref. Date</dt>
+                    <dd className="text-slate-700">{new Date(selected.preferred_date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</dd>
+                  </div>
                 ) : null}
                 {selected.preferred_time_slot ? (
-                  <p><span className="font-medium text-slate-900">Time:</span> {selected.preferred_time_slot}</p>
+                  <div className="grid grid-cols-[6rem_1fr] gap-1">
+                    <dt className="font-semibold text-slate-500">Pref. Time</dt>
+                    <dd className="text-slate-700">{selected.preferred_time_slot}</dd>
+                  </div>
                 ) : null}
                 {selected.test_package_required ? (
-                  <p><span className="font-medium text-slate-900">Tests:</span> {selected.test_package_required}</p>
+                  <div className="grid grid-cols-[6rem_1fr] gap-1">
+                    <dt className="font-semibold text-slate-500">Tests</dt>
+                    <dd className="text-slate-700">{selected.test_package_required}</dd>
+                  </div>
                 ) : null}
                 {selected.notes ? (
                   <div>
-                    <p className="font-medium text-slate-900">Notes:</p>
-                    <p className="mt-0.5 whitespace-pre-wrap">{selected.notes}</p>
+                    <dt className="mb-0.5 font-semibold text-slate-500">Notes</dt>
+                    <dd className="whitespace-pre-wrap text-slate-700">{selected.notes}</dd>
                   </div>
                 ) : null}
-                <p><span className="font-medium text-slate-900">Received:</span> {new Date(selected.created_at).toLocaleString("en-IN")}</p>
-              </div>
+                <div className="grid grid-cols-[6rem_1fr] gap-1">
+                  <dt className="font-semibold text-slate-500">Received</dt>
+                  <dd className="text-slate-700">{new Date(selected.created_at).toLocaleString("en-IN")}</dd>
+                </div>
+              </dl>
 
               {/* Prescription file */}
               {selected.prescription_file_path ? (
                 <div>
-                  <p className="mb-1.5 text-xs font-medium text-slate-700">Prescription file</p>
+                  <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Prescription file</p>
                   {signedUrl ? (
                     <a
                       href={signedUrl}
@@ -347,15 +412,15 @@ export default function HomeCollectionsPage() {
               ) : null}
 
               {/* Appointment Confirmation */}
-              <div className="space-y-2.5 rounded-lg border border-teal-100 bg-teal-50/50 p-3">
-                <p className="text-xs font-semibold uppercase tracking-wide text-teal-700">Appointment Confirmation</p>
+              <div className="space-y-3 rounded-xl border border-slate-200 bg-white p-4">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Appointment Details</p>
 
                 <div className="grid grid-cols-2 gap-2">
                   <div className="col-span-1">
                     <label className="mb-0.5 block text-xs text-slate-500">Date</label>
                     <input
                       type="date"
-                      className="w-full rounded border border-slate-200 bg-white px-2 py-1 text-xs outline-none focus:border-teal-400"
+                      className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100"
                       value={confirmedDate}
                       onChange={(e) => setConfirmedDate(e.target.value)}
                     />
@@ -364,7 +429,7 @@ export default function HomeCollectionsPage() {
                     <label className="mb-0.5 block text-xs text-slate-500">Time Slot</label>
                     <input
                       type="text"
-                      className="w-full rounded border border-slate-200 bg-white px-2 py-1 text-xs outline-none focus:border-teal-400"
+                      className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100"
                       placeholder="e.g. 7:00–8:00 AM"
                       value={confirmedTimeSlot}
                       onChange={(e) => setConfirmedTimeSlot(e.target.value)}
@@ -375,7 +440,7 @@ export default function HomeCollectionsPage() {
                 <div>
                   <label className="mb-0.5 block text-xs text-slate-500">Collection Address</label>
                   <textarea
-                    className="w-full rounded border border-slate-200 bg-white px-2 py-1 text-xs outline-none focus:border-teal-400"
+                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100"
                     rows={2}
                     placeholder="Full address for phlebotomist…"
                     value={confirmedAddress}
@@ -387,7 +452,7 @@ export default function HomeCollectionsPage() {
                   <label className="mb-0.5 block text-xs text-slate-500">Tests / Package</label>
                   <input
                     type="text"
-                    className="w-full rounded border border-slate-200 bg-white px-2 py-1 text-xs outline-none focus:border-teal-400"
+                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100"
                     placeholder="e.g. CBC, LFT, Blood Sugar"
                     value={confirmedTestPackage}
                     onChange={(e) => setConfirmedTestPackage(e.target.value)}
@@ -398,7 +463,7 @@ export default function HomeCollectionsPage() {
                   <label className="mb-0.5 block text-xs text-slate-500">Fasting Instructions</label>
                   <input
                     type="text"
-                    className="w-full rounded border border-slate-200 bg-white px-2 py-1 text-xs outline-none focus:border-teal-400"
+                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100"
                     placeholder="e.g. 8 hours fasting required"
                     value={fastingInstructions}
                     onChange={(e) => setFastingInstructions(e.target.value)}
@@ -408,7 +473,7 @@ export default function HomeCollectionsPage() {
                 <div>
                   <label className="mb-0.5 block text-xs text-slate-500">Additional Instructions</label>
                   <textarea
-                    className="w-full rounded border border-slate-200 bg-white px-2 py-1 text-xs outline-none focus:border-teal-400"
+                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100"
                     rows={2}
                     placeholder="Any other notes for patient…"
                     value={patientInstructions}
@@ -419,7 +484,7 @@ export default function HomeCollectionsPage() {
                 <button
                   onClick={saveConfirmation}
                   disabled={savingConfirmation}
-                  className="w-full rounded bg-teal-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-teal-700 disabled:opacity-60"
+                  className="btn-primary w-full text-xs disabled:opacity-60"
                 >
                   {savingConfirmation ? "Saving…" : "Save Confirmation Details"}
                 </button>
@@ -427,7 +492,7 @@ export default function HomeCollectionsPage() {
                 {/* Copy WhatsApp appointment message */}
                 <button
                   onClick={copyWaAppt}
-                  className="flex w-full items-center justify-center gap-1.5 rounded border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-100"
+                  className="flex w-full items-center justify-center gap-1.5 rounded-[8px] border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-100"
                 >
                   {waCopied ? <CheckCircle className="size-3.5" /> : <Copy className="size-3.5" />}
                   {waCopied ? "Copied!" : "Copy WhatsApp Appointment Message"}
@@ -439,7 +504,7 @@ export default function HomeCollectionsPage() {
                     <button
                       onClick={sendApptEmail}
                       disabled={emailApptState === "sending" || emailApptState === "sent"}
-                      className={`flex w-full items-center justify-center gap-1.5 rounded border px-3 py-1.5 text-xs font-semibold disabled:opacity-60 ${
+                      className={`flex w-full items-center justify-center gap-1.5 rounded-[8px] border px-3 py-2 text-xs font-semibold disabled:opacity-60 ${
                         emailApptState === "sent"
                           ? "border-emerald-200 bg-emerald-50 text-emerald-700"
                           : emailApptState === "error"
@@ -470,7 +535,7 @@ export default function HomeCollectionsPage() {
 
               {/* Status */}
               <div>
-                <p className="mb-1.5 text-xs font-medium text-slate-700">Status</p>
+                <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Update status</p>
                 <div className="flex flex-wrap gap-1.5">
                   {STATUSES.map((s) => (
                     <button
@@ -486,7 +551,7 @@ export default function HomeCollectionsPage() {
 
               {/* Staff notes */}
               <div>
-                <p className="mb-1.5 text-xs font-medium text-slate-700">Staff notes</p>
+                <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Staff notes</p>
                 <textarea
                   className="w-full rounded-lg border border-slate-200 p-2 text-xs outline-none focus:border-teal-400 focus:ring-1 focus:ring-teal-400"
                   rows={4}

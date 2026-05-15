@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
 import {
+  ChevronRight,
   ClipboardList,
   Download,
   FileText,
@@ -154,7 +155,7 @@ export default function AdminDashboardPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-64 items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center">
         <div className="h-7 w-7 animate-spin rounded-full border-2 border-slate-300 border-t-[#061A33]" />
       </div>
     );
@@ -170,11 +171,21 @@ export default function AdminDashboardPage() {
     prescription: ScrollText,
     enquiry: ClipboardList,
   };
+  const TYPE_ICON_BG: Record<string, string> = {
+    home_collection: "bg-teal-100 text-teal-700",
+    prescription: "bg-violet-100 text-violet-700",
+    enquiry: "bg-sky-100 text-sky-700",
+  };
+
+  const todayLabel = new Date().toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "long", year: "numeric" });
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-slate-950">Dashboard</h1>
+        <div>
+          <h1 className="text-2xl font-semibold text-slate-950">Dashboard</h1>
+          <p className="text-sm text-slate-500">{todayLabel}</p>
+        </div>
         <Link href="/admin/reports/upload" className="btn-primary text-sm">
           <Plus className="size-4" /> Upload Report
         </Link>
@@ -188,13 +199,13 @@ export default function AdminDashboardPage() {
           { label: "Total Downloads",   value: stats?.totalDownloads ?? 0, icon: TrendingUp,  color: "text-teal-700",   bg: "bg-teal-50" },
           { label: "Uploaded Today",    value: stats?.todayUploads   ?? 0, icon: Upload,     color: "text-amber-700",   bg: "bg-amber-50" },
         ].map(({ label, value, icon: Icon, color, bg }) => (
-          <div key={label} className="card-premium flex items-center gap-4 p-5">
-            <div className={`flex size-10 shrink-0 items-center justify-center rounded-lg ${bg}`}>
+          <div key={label} className="card-premium flex items-center gap-4 border border-slate-100 p-5">
+            <div className={`flex size-11 shrink-0 items-center justify-center rounded-xl ${bg}`}>
               <Icon className={`size-5 ${color}`} />
             </div>
             <div>
-              <p className="text-2xl font-bold text-slate-950">{value}</p>
-              <p className="text-sm text-slate-500">{label}</p>
+              <p className="text-3xl font-bold text-slate-950">{value}</p>
+              <p className="mt-0.5 text-xs font-medium uppercase tracking-wide text-slate-400">{label}</p>
             </div>
           </div>
         ))}
@@ -228,14 +239,15 @@ export default function AdminDashboardPage() {
             bg: "bg-sky-50",
           },
         ].map(({ label, value, icon: Icon, href, color, bg }) => (
-          <Link key={label} href={href} className="card-premium flex items-center gap-4 p-5 hover:bg-slate-50 transition-colors">
-            <div className={`flex size-10 shrink-0 items-center justify-center rounded-lg ${bg}`}>
+          <Link key={label} href={href} className="card-premium group flex items-center gap-4 border border-slate-100 p-5 transition-colors hover:bg-slate-50">
+            <div className={`flex size-11 shrink-0 items-center justify-center rounded-xl ${bg}`}>
               <Icon className={`size-5 ${color}`} />
             </div>
-            <div>
-              <p className="text-2xl font-bold text-slate-950">{value}</p>
-              <p className="text-sm text-slate-500">{label}</p>
+            <div className="flex-1">
+              <p className="text-3xl font-bold text-slate-950">{value}</p>
+              <p className="mt-0.5 text-xs font-medium uppercase tracking-wide text-slate-400">{label}</p>
             </div>
+            <ChevronRight className="size-4 text-slate-300 transition-colors group-hover:text-slate-500" />
           </Link>
         ))}
       </div>
@@ -249,21 +261,24 @@ export default function AdminDashboardPage() {
           <div className="divide-y divide-slate-50">
             {stats?.latestRequests.map((r) => {
               const Icon = TYPE_ICON[r.type] ?? ClipboardList;
+              const iconBg = TYPE_ICON_BG[r.type] ?? "bg-slate-100 text-slate-500";
               const date = new Date(r.created_at).toLocaleDateString("en-IN", {
                 day: "numeric", month: "short",
               });
               return (
-                <Link key={`${r.type}-${r.id}`} href={r.href} className="flex items-center gap-3 px-5 py-3 hover:bg-slate-50 transition-colors">
-                  <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-slate-100">
-                    <Icon className="size-4 text-slate-500" />
+                <Link key={`${r.type}-${r.id}`} href={r.href} className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-slate-50">
+                  <div className={`flex size-8 shrink-0 items-center justify-center rounded-full ${iconBg}`}>
+                    <Icon className="size-4" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium text-slate-950">{r.full_name}</p>
                     <p className="text-xs text-slate-400">{TYPE_LABEL[r.type]} · {r.summary} · {date}</p>
                   </div>
                   <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${REQ_STATUS_COLORS[r.status] ?? "bg-slate-100 text-slate-600"}`}>
+                    <span className="mr-1 inline-block size-1.5 rounded-full bg-current" />
                     {r.status}
                   </span>
+                  <ChevronRight className="size-4 shrink-0 text-slate-200" />
                 </Link>
               );
             })}
@@ -280,31 +295,34 @@ export default function AdminDashboardPage() {
           </Link>
         </div>
         {stats?.recentReports.length === 0 ? (
-          <p className="px-5 py-10 text-center text-sm text-slate-400">
-            No reports yet.{" "}
-            <Link href="/admin/reports/upload" className="font-medium text-teal-600 underline">
-              Upload the first one.
-            </Link>
-          </p>
+          <div className="flex flex-col items-center gap-3 px-5 py-12 text-center">
+            <FileText className="size-8 text-slate-200" />
+            <p className="text-sm text-slate-400">
+              No reports yet.{" "}
+              <Link href="/admin/reports/upload" className="font-medium text-teal-600 underline">
+                Upload the first one.
+              </Link>
+            </p>
+          </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-slate-100 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
-                  <th className="px-5 py-3">Patient</th>
-                  <th className="hidden px-5 py-3 sm:table-cell">Test</th>
-                  <th className="hidden px-5 py-3 md:table-cell">Report Date</th>
-                  <th className="hidden px-5 py-3 text-center sm:table-cell">Downloads</th>
-                  <th className="px-5 py-3">Status</th>
+                <tr className="border-b border-slate-100 bg-slate-50 text-left">
+                  <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Patient</th>
+                  <th className="hidden px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400 sm:table-cell">Test</th>
+                  <th className="hidden px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400 md:table-cell">Report Date</th>
+                  <th className="hidden px-5 py-3 text-center text-[11px] font-semibold uppercase tracking-wider text-slate-400 sm:table-cell">Downloads</th>
+                  <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
                 {stats?.recentReports.map((r) => (
-                  <tr key={r.id} className="hover:bg-slate-50">
+                  <tr key={r.id} className="transition-colors hover:bg-slate-50">
                     <td className="px-5 py-3.5">
                       <Link href={`/admin/reports?id=${r.id}`} className="block">
                         <p className="font-medium text-slate-950 hover:text-teal-700">{r.patient_name}</p>
-                        <p className="text-xs text-slate-400">{r.report_number}</p>
+                        <p className="font-mono text-xs text-slate-400">{r.report_number}</p>
                       </Link>
                     </td>
                     <td className="hidden px-5 py-3.5 text-slate-600 sm:table-cell">{r.test_name}</td>
@@ -316,6 +334,7 @@ export default function AdminDashboardPage() {
                     </td>
                     <td className="px-5 py-3.5">
                       <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${STATUS_COLORS[r.status] ?? ""}`}>
+                        <span className="mr-1 inline-block size-1.5 rounded-full bg-current" />
                         {r.status}
                       </span>
                     </td>
