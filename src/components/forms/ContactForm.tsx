@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import { Send } from "lucide-react";
 import { bookingReasons } from "@/config/site";
 import { isValidIndianMobile } from "@/lib/utils";
+import { supabase } from "@/lib/supabase/client";
 import { errorClass, inputClass, labelClass } from "./formStyles";
 
 type FormState = {
@@ -26,8 +27,9 @@ export function ContactForm() {
   const [form, setForm] = useState(initialState);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  function submit(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
 
@@ -46,20 +48,33 @@ export function ContactForm() {
       return;
     }
 
-    // TODO: Connect this request to a secure backend or CRM before collecting production inquiries.
-    if (process.env.NODE_ENV === "development") {
-      console.info("Nova Diagnostics contact inquiry", form);
-    }
+    setSubmitting(true);
+    try {
+      const { error: insertError } = await supabase
+        .from("contact_enquiries")
+        .insert({
+          full_name: form.name.trim(),
+          mobile: form.mobile.replace(/\D/g, "").slice(-10),
+          inquiry_type: form.reason,
+          message: form.message.trim() || null,
+        });
 
-    setSuccess(true);
-    setForm(initialState);
+      if (insertError) throw insertError;
+
+      setSuccess(true);
+      setForm(initialState);
+    } catch {
+      setError("Something went wrong. Please try again or call us directly.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
     <form onSubmit={submit} className="card-premium space-y-5 p-5 md:p-6">
       {success ? (
         <div className="rounded-[8px] border border-teal-200 bg-teal-50 p-4 text-sm font-medium text-teal-900">
-          Thank you. Our team will contact you shortly.
+          Thank you. Your enquiry has been received. Our team will contact you shortly.
         </div>
       ) : null}
       <div className="grid gap-4 sm:grid-cols-2">
@@ -120,9 +135,9 @@ export function ContactForm() {
         </span>
       </label>
       {error ? <p className={errorClass}>{error}</p> : null}
-      <button type="submit" className="btn-primary w-full">
+      <button type="submit" disabled={submitting} className="btn-primary w-full disabled:opacity-60">
         <Send className="size-4" aria-hidden="true" />
-        Submit Request
+        {submitting ? "Submitting…" : "Submit Request"}
       </button>
     </form>
   );

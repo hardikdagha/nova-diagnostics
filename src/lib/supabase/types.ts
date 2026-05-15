@@ -78,6 +78,62 @@ export interface Database {
         Insert: Omit<Database["public"]["Tables"]["staff_users"]["Row"], "id" | "created_at">;
         Update: Partial<Database["public"]["Tables"]["staff_users"]["Insert"]>;
       };
+      contact_enquiries: {
+        Row: {
+          id: string;
+          full_name: string;
+          mobile: string;
+          email: string | null;
+          inquiry_type: string | null;
+          message: string | null;
+          status: string;
+          staff_notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["contact_enquiries"]["Row"], "id" | "created_at" | "updated_at" | "status"> & { status?: string };
+        Update: Partial<Omit<Database["public"]["Tables"]["contact_enquiries"]["Row"], "id" | "created_at">>;
+      };
+      home_collection_requests: {
+        Row: {
+          id: string;
+          full_name: string;
+          mobile: string;
+          email: string | null;
+          area_location: string;
+          full_address: string | null;
+          preferred_date: string | null;
+          preferred_time_slot: string | null;
+          test_package_required: string | null;
+          fasting_preference: string | null;
+          prescription_file_path: string | null;
+          notes: string | null;
+          status: string;
+          staff_notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["home_collection_requests"]["Row"], "id" | "created_at" | "updated_at" | "status"> & { status?: string };
+        Update: Partial<Omit<Database["public"]["Tables"]["home_collection_requests"]["Row"], "id" | "created_at">>;
+      };
+      prescription_requests: {
+        Row: {
+          id: string;
+          full_name: string;
+          mobile: string;
+          email: string | null;
+          preferred_service: string | null;
+          area_location: string | null;
+          prescription_file_path: string | null;
+          notes: string | null;
+          status: string;
+          staff_notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Omit<Database["public"]["Tables"]["prescription_requests"]["Row"], "id" | "created_at" | "updated_at" | "status"> & { status?: string };
+        Update: Partial<Omit<Database["public"]["Tables"]["prescription_requests"]["Row"], "id" | "created_at">>;
+      };
     };
   };
 }
@@ -88,3 +144,6 @@ export type Patient = Database["public"]["Tables"]["patients"]["Row"];
 export type Report = Database["public"]["Tables"]["reports"]["Row"];
 export type ReportAccessLog = Database["public"]["Tables"]["report_access_logs"]["Row"];
 export type StaffUser = Database["public"]["Tables"]["staff_users"]["Row"];
+export type ContactEnquiry = Database["public"]["Tables"]["contact_enquiries"]["Row"];
+export type HomeCollectionRequest = Database["public"]["Tables"]["home_collection_requests"]["Row"];
+export type PrescriptionRequest = Database["public"]["Tables"]["prescription_requests"]["Row"];

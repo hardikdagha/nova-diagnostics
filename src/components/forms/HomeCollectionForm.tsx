@@ -1,9 +1,13 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useRef, useState } from "react";
 import { CalendarCheck } from "lucide-react";
 import { isValidIndianMobile } from "@/lib/utils";
+import { supabase } from "@/lib/supabase/client";
 import { errorClass, inputClass, labelClass } from "./formStyles";
+
+const ALLOWED_TYPES = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
+const MAX_FILE_BYTES = 5 * 1024 * 1024; // 5 MB
 
 type FormState = {
   name: string;
@@ -29,52 +33,99 @@ const initialState: FormState = {
 
 export function HomeCollectionForm() {
   const [form, setForm] = useState(initialState);
-  const [fileName, setFileName] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  function submit(event: FormEvent<HTMLFormElement>) {
+  function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+    setFileError("");
+    const selected = event.target.files?.[0] ?? null;
+    if (!selected) { setFile(null); return; }
+
+    if (!ALLOWED_TYPES.includes(selected.type)) {
+      setFileError("Only PDF, JPG, PNG, or WEBP files are accepted.");
+      event.target.value = "";
+      setFile(null);
+      return;
+    }
+    if (selected.size > MAX_FILE_BYTES) {
+      setFileError("File must be under 5 MB.");
+      event.target.value = "";
+      setFile(null);
+      return;
+    }
+    setFile(selected);
+  }
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
+    setFileError("");
 
-    if (!form.name.trim()) {
-      setError("Please enter your full name.");
-      return;
+    if (!form.name.trim()) { setError("Please enter your full name."); return; }
+    if (!isValidIndianMobile(form.mobile)) { setError("Please enter a valid Indian mobile number."); return; }
+    if (!form.area.trim()) { setError("Please enter your area or location."); return; }
+    if (!form.consent) { setError("Please confirm consent before submitting."); return; }
+
+    setSubmitting(true);
+    try {
+      let prescriptionFilePath: string | null = null;
+
+      // Upload prescription file if provided
+      if (file) {
+        const ext = file.name.split(".").pop() ?? "bin";
+        const mobile = form.mobile.replace(/\D/g, "").slice(-10);
+        const fileName = `${Date.now()}_${mobile}.${ext}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from("home-collection-prescriptions")
+          .upload(fileName, file, { contentType: file.type, upsert: false });
+
+        if (uploadError) throw new Error("File upload failed. Please try again.");
+        prescriptionFilePath = uploadData.path;
+      }
+
+      const { error: insertError } = await supabase
+        .from("home_collection_requests")
+        .insert({
+          full_name: form.name.trim(),
+          mobile: form.mobile.replace(/\D/g, "").slice(-10),
+          area_location: form.area.trim(),
+          preferred_date: form.preferredDate || null,
+          preferred_time_slot: form.preferredTime,
+          test_package_required: form.testRequired.trim() || null,
+          notes: form.notes.trim() || null,
+          prescription_file_path: prescriptionFilePath,
+        });
+
+      if (insertError) {
+        // Clean up uploaded file on insert failure
+        if (prescriptionFilePath) {
+          await supabase.storage
+            .from("home-collection-prescriptions")
+            .remove([prescriptionFilePath]);
+        }
+        throw insertError;
+      }
+
+      setSuccess(true);
+      setFile(null);
+      setForm(initialState);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    } catch {
+      setError("Something went wrong. Please try again or call us directly.");
+    } finally {
+      setSubmitting(false);
     }
-
-    if (!isValidIndianMobile(form.mobile)) {
-      setError("Please enter a valid Indian mobile number.");
-      return;
-    }
-
-    if (!form.area.trim()) {
-      setError("Please enter your area or location.");
-      return;
-    }
-
-    if (!form.consent) {
-      setError("Please confirm consent before submitting.");
-      return;
-    }
-
-    // TODO: Replace this UI-only placeholder with secure booking and prescription upload storage.
-    if (process.env.NODE_ENV === "development") {
-      console.info("Nova Diagnostics home collection request", {
-        ...form,
-        prescriptionFileName: fileName || null,
-      });
-    }
-
-    setSuccess(true);
-    setFileName("");
-    setForm(initialState);
   }
 
   return (
     <form onSubmit={submit} className="card-premium space-y-5 p-5 md:p-6">
       {success ? (
         <div className="rounded-[8px] border border-teal-200 bg-teal-50 p-4 text-sm font-medium text-teal-900">
-          Thank you. Our team will contact you shortly.
+          Thank you. Your home collection request has been received. Our team will contact you shortly to confirm availability.
         </div>
       ) : null}
       <div className="grid gap-4 sm:grid-cols-2">
@@ -142,16 +193,21 @@ export function HomeCollectionForm() {
           placeholder="CBC, Thyroid Profile, Full Body Checkup..."
         />
       </label>
-      <label className="space-y-2">
-        <span className={labelClass}>Prescription upload optional</span>
+      <div className="space-y-2">
+        <span className={labelClass}>Prescription upload <span className="font-normal text-slate-400">(optional)</span></span>
         <input
+          ref={fileInputRef}
           className={inputClass}
           type="file"
           accept=".pdf,.jpg,.jpeg,.png,.webp"
-          onChange={(event) => setFileName(event.target.files?.[0]?.name ?? "")}
+          onChange={handleFileChange}
         />
-        {fileName ? <span className="text-xs text-slate-500">Selected: {fileName}</span> : null}
-      </label>
+        {file && !fileError ? (
+          <span className="block text-xs text-teal-700">Selected: {file.name}</span>
+        ) : null}
+        {fileError ? <p className={errorClass}>{fileError}</p> : null}
+        <span className="block text-xs text-slate-500">PDF, JPG, PNG, WEBP · Max 5 MB</span>
+      </div>
       <label className="space-y-2">
         <span className={labelClass}>Notes</span>
         <textarea
@@ -169,13 +225,13 @@ export function HomeCollectionForm() {
           onChange={(event) => setForm({ ...form, consent: event.target.checked })}
         />
         <span>
-          I consent to being contacted for home sample collection and understand that uploads are not stored until backend integration is completed.
+          I consent to Nova Diagnostics contacting me for home sample collection scheduling.
         </span>
       </label>
       {error ? <p className={errorClass}>{error}</p> : null}
-      <button type="submit" className="btn-primary w-full">
+      <button type="submit" disabled={submitting} className="btn-primary w-full disabled:opacity-60">
         <CalendarCheck className="size-4" aria-hidden="true" />
-        Request Home Collection
+        {submitting ? "Submitting…" : "Request Home Collection"}
       </button>
     </form>
   );
