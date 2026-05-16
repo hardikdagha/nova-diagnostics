@@ -37,12 +37,14 @@ export default function PatientLoginPage() {
     setLoading(true);
     setError("");
 
-    // emailRedirectTo must match an allowed redirect URL in Supabase dashboard
-    // → Authentication → URL Configuration → Redirect URLs → add https://novadiagnosticslab.com/**
+    // Hardcoded to production URL — do NOT use window.location.origin here.
+    // window.location.origin returns http://localhost:3000 in local dev,
+    // which Supabase then embeds in the magic-link email. The production
+    // URL must be whitelisted in Supabase → Authentication → URL Configuration.
     const { error: authError } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback/`,
+        emailRedirectTo: "https://novadiagnosticslab.com/auth/callback/",
       },
     });
 

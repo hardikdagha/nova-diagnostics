@@ -46,7 +46,7 @@ export default function PatientRegisterPage() {
     const { error: authError } = await supabase.auth.signInWithOtp({
       email: form.email,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback/`,
+        emailRedirectTo: "https://novadiagnosticslab.com/auth/callback/",
         data: {
           full_name: form.fullName,
           // Mobile stored for future phone-OTP verification; not used for report matching yet
