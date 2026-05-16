@@ -3,7 +3,7 @@
 import { Fragment, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase/client";
+import { staffSupabase } from "@/lib/supabase/staffClient";
 import { Activity, ClipboardList, FileText, Home, LogOut, Menu, ScrollText, Upload, X } from "lucide-react";
 
 /** Reports and Upload-Report share a prefix — only highlight "Reports" on the exact path. */
@@ -31,31 +31,78 @@ export default function AdminLayoutShell({ children }: { children: React.ReactNo
   const [staffEmail, setStaffEmail] = useState<string | null>(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (!session) {
-        router.replace("/admin/login/");
-        return;
-      }
-      // Verify staff/admin role
-      const { data } = await supabase
+    let mounted = true;
+
+    // Verifies the signed-in user is an active staff member.
+    // Called both on INITIAL_SESSION and SIGNED_IN events so that:
+    //   1. Refresh/hard-load: existing session is checked immediately.
+    //   2. Post-login navigation: SIGNED_IN fires and content loads without a
+    //      manual page refresh (fixes the "spinner until refresh" bug).
+    const verifyStaff = async (userId: string, email: string | undefined) => {
+      const { data } = await staffSupabase
         .from("staff_users")
         .select("id")
-        .eq("user_id", session.user.id)
+        .eq("user_id", userId)
         .eq("active", true)
         .maybeSingle();
 
+      if (!mounted) return;
+
       if (!data) {
-        await supabase.auth.signOut();
+        // Authenticated but not a staff member — sign out and redirect.
+        await staffSupabase.auth.signOut();
         router.replace("/admin/login/");
+        setChecking(false);
         return;
       }
-      setStaffEmail(session.user.email ?? null);
+
+      setStaffEmail(email ?? null);
       setChecking(false);
-    });
+    };
+
+    // onAuthStateChange fires INITIAL_SESSION synchronously on subscribe,
+    // so we always get the initial state without a separate getSession() call.
+    // It also fires SIGNED_IN after a successful login, which is what resolves
+    // the loading bug: the effect runs once (on mount), and the listener
+    // handles all subsequent auth transitions without needing a re-mount.
+    const { data: { subscription } } = staffSupabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (!mounted) return;
+
+        if (
+          session &&
+          (event === "INITIAL_SESSION" ||
+            event === "SIGNED_IN" ||
+            event === "TOKEN_REFRESHED")
+        ) {
+          void verifyStaff(session.user.id, session.user.email);
+        } else if (event === "INITIAL_SESSION" && !session) {
+          // No staff session on first load.
+          setChecking(false);
+          const currentPath = (
+            typeof window !== "undefined" ? window.location.pathname : ""
+          ).replace(/\/$/, "");
+          if (currentPath !== "/admin/login") {
+            router.replace("/admin/login/");
+          }
+        } else if (event === "SIGNED_OUT") {
+          setStaffEmail(null);
+          setChecking(false);
+          router.replace("/admin/login/");
+        }
+      }
+    );
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, [router]);
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    // Signs out only the staff session (nova-staff-auth).
+    // The patient session (nova-patient-auth) is untouched.
+    await staffSupabase.auth.signOut();
     router.replace("/admin/login/");
   };
 

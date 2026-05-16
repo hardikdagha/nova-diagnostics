@@ -2,7 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase/client";
+import { staffSupabase as supabase } from "@/lib/supabase/staffClient";
 import { applyLetterhead } from "@/lib/pdf/applyLetterhead";
 import { CheckCircle, Copy, FileUp, Layers, MessageSquare, UserCheck, X } from "lucide-react";
 import { inputClass, labelClass, errorClass } from "@/components/forms/formStyles";

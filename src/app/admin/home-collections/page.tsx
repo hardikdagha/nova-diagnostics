@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AlertTriangle, Calendar, CheckCircle, Copy, ExternalLink, FileText, Home, Mail, MapPin, MessageSquare, Phone, Search, X } from "lucide-react";
-import { supabase } from "@/lib/supabase/client";
+import { staffSupabase as supabase } from "@/lib/supabase/staffClient";
 import type { HomeCollectionRequest } from "@/lib/supabase/types";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase/client";
+import { staffSupabase as supabase } from "@/lib/supabase/staffClient";
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { inputClass, labelClass, errorClass } from "@/components/forms/formStyles";
 

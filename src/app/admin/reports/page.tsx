@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase/client";
+import { staffSupabase as supabase } from "@/lib/supabase/staffClient";
 import type { Report } from "@/lib/supabase/types";
 import {
   AlertTriangle, ArrowLeft, CheckCircle, Copy, Download,

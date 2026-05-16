@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ClipboardList, MessageSquare, Phone, Search, X } from "lucide-react";
-import { supabase } from "@/lib/supabase/client";
+import { staffSupabase as supabase } from "@/lib/supabase/staffClient";
 import type { ContactEnquiry } from "@/lib/supabase/types";
 
 const STATUSES = ["New", "Viewed", "Contacted", "Resolved", "Closed", "Spam"] as const;

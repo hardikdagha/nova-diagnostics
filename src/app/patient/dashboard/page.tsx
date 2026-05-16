@@ -20,7 +20,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase/client";
+import { patientSupabase as supabase } from "@/lib/supabase/patientClient";
 import type { Report } from "@/lib/supabase/types";
 
 // Narrow type — only the columns we SELECT (avoids exposing token/file_path to the bundle)

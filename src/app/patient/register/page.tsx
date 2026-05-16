@@ -17,7 +17,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase/client";
+import { patientSupabase as supabase } from "@/lib/supabase/patientClient";
 import { ArrowRight, Mail, Phone, User } from "lucide-react";
 import { inputClass, labelClass, errorClass } from "@/components/forms/formStyles";
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ExternalLink, FileText, MessageSquare, Phone, ScrollText, Search, X } from "lucide-react";
-import { supabase } from "@/lib/supabase/client";
+import { staffSupabase as supabase } from "@/lib/supabase/staffClient";
 import type { PrescriptionRequest } from "@/lib/supabase/types";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;

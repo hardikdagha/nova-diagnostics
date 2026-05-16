@@ -21,7 +21,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase/client";
+// Must use patientSupabase so the exchanged session is stored in "nova-patient-auth",
+// not in the staff storage key. This callback is exclusively for patient magic-link logins.
+import { patientSupabase as supabase } from "@/lib/supabase/patientClient";
 import { XCircle } from "lucide-react";
 
 export default function AuthCallbackPage() {
