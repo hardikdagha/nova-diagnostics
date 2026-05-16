@@ -9,11 +9,11 @@ export function MedicalLeadership({ preview = false }: { preview?: boolean }) {
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <SectionHeading
             eyebrow="Medical Leadership"
-            title="Guided by diagnostic leadership"
+            title="Doctor-guided diagnostic care."
             description={
               preview
                 ? "Meet the doctors who guide Nova Diagnostics, bringing careful focus to diagnostic accuracy and patient care."
-                : "Nova Diagnostics is supported by medical leadership focused on careful processes, clear communication and patient support."
+                : "Nova Diagnostics works with medical leadership focused on accurate diagnostics, clear processes, and patient-centred support."
             }
           />
         </div>

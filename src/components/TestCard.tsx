@@ -5,7 +5,7 @@ import { getWhatsappUrl } from "@/lib/utils";
 
 export function TestCard({ test }: { test: LabTest }) {
   return (
-    <article className="card-premium group flex h-full flex-col p-5">
+    <article className="card-premium group flex h-full flex-col p-4">
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase text-teal-700">
@@ -46,18 +46,21 @@ export function TestCard({ test }: { test: LabTest }) {
           </div>
         ) : null}
       </dl>
-      <div className="mt-auto grid gap-3 pt-6 sm:grid-cols-2">
-        <Link href={`/tests/${test.slug}`} className="btn-secondary justify-center">
+      <div className="mt-auto flex items-center justify-between gap-3 pt-5">
+        <Link
+          href={`/tests/${test.slug}`}
+          className="flex items-center gap-1 text-sm font-semibold text-teal-700 hover:underline"
+        >
           View Details
-          <ArrowRight className="size-4" aria-hidden="true" />
+          <ArrowRight className="size-3.5" aria-hidden="true" />
         </Link>
         <a
           href={getWhatsappUrl(
             `Hello Nova Diagnostics, I would like to book ${test.name}.`,
           )}
-          className="btn-primary justify-center"
+          className="btn-primary px-4 py-2 text-sm"
         >
-          <MessageCircle className="size-4" aria-hidden="true" />
+          <MessageCircle className="size-3.5" aria-hidden="true" />
           Book
         </a>
       </div>

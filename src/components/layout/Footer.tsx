@@ -8,15 +8,13 @@ import { getCallUrl, getWhatsappUrl } from "@/lib/utils";
 
 const quickLinks = [
   ["Tests", "/tests"],
-  ["Health Packages", "/packages"],
-  ["Home Sample Collection", "/home-sample-collection"],
+  ["Packages", "/packages"],
+  ["Home Collection", "/home-sample-collection"],
   ["Upload Prescription", "/upload-prescription"],
   ["Patient Login", "/patient/login"],
   ["Download Report", "/reports"],
   ["About", "/about"],
   ["Contact", "/contact"],
-  ["Privacy Policy", "/privacy-policy"],
-  ["Terms", "/terms"],
 ];
 
 export function Footer() {
@@ -52,7 +50,7 @@ export function Footer() {
           <div>
             <h2 className="text-sm font-semibold uppercase text-cyan-100">Popular tests</h2>
             <ul className="mt-4 grid gap-3 text-sm text-slate-200">
-              {tests.slice(0, 7).map((test) => (
+              {tests.slice(0, 6).map((test) => (
                 <li key={test.slug}>
                   <Link href={`/tests/${test.slug}`} className="hover:text-white">
                     {test.name}
@@ -64,7 +62,7 @@ export function Footer() {
               Packages
             </h2>
             <ul className="mt-4 grid gap-3 text-sm text-slate-200">
-              {packages.slice(0, 4).map((healthPackage) => (
+              {packages.slice(0, 3).map((healthPackage) => (
                 <li key={healthPackage.slug}>
                   <Link href={`/packages/${healthPackage.slug}`} className="hover:text-white">
                     {healthPackage.name}
@@ -122,7 +120,8 @@ export function Footer() {
         </div>
         <div className="mt-12 border-t border-white/10 pt-6 text-xs text-slate-300">
           <p>
-            &copy; {new Date().getFullYear()} Nova Diagnostics, Vashi, Navi Mumbai. Information on this website is for general awareness and does not constitute medical advice.
+            &copy; {new Date().getFullYear()} Nova Diagnostics, Vashi, Navi Mumbai. Information on this website is for general awareness and does not constitute medical advice.{" "}
+            <Link href="/privacy-policy" className="underline hover:text-white">Privacy Policy</Link> · <Link href="/terms" className="underline hover:text-white">Terms</Link>
           </p>
         </div>
       </div>

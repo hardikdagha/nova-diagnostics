@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { Phone, UserRound } from "lucide-react";
+import { Phone } from "lucide-react";
 import type { DoctorProfile } from "@/config/site";
 import { getDoctorCallUrl } from "@/lib/utils";
 
@@ -20,9 +20,13 @@ export function DoctorCard({ doctor }: DoctorCardProps) {
     .slice(0, 2);
   const showImage = doctor.imageAvailable !== false && !imageFailed;
 
+  // Extract reg number from bio if present
+  const regMatch = doctor.bio.match(/Reg\s*No[:\s]+([^\s.]+)/i);
+  const regNo = regMatch ? regMatch[1] : null;
+
   return (
     <article className="card-premium overflow-hidden">
-      <div className="relative aspect-[4/3] bg-gradient-to-br from-slate-100 via-cyan-50 to-white">
+      <div className="relative aspect-[4/3] bg-[#061A33]">
         {showImage ? (
           <Image
             src={doctor.image}
@@ -35,23 +39,26 @@ export function DoctorCard({ doctor }: DoctorCardProps) {
         ) : (
           <div className="flex h-72 items-center justify-center p-8 text-center">
             <div>
-              <span className="mx-auto flex size-24 items-center justify-center rounded-[8px] bg-white text-3xl font-semibold text-[#061A33] shadow-sm">
-                {initials || <UserRound className="size-10" aria-hidden="true" />}
+              <span className="mx-auto flex size-24 items-center justify-center rounded-[8px] bg-white/10 text-3xl font-bold text-white">
+                {initials}
               </span>
-              <p className="mt-5 text-base font-semibold text-slate-800">{doctor.name}</p>
+              <p className="mt-5 text-base font-semibold text-white/80">{doctor.name}</p>
             </div>
           </div>
         )}
       </div>
       <div className="p-6">
-        <p className="text-sm font-semibold uppercase text-teal-700">
+        <p className="text-xs font-semibold uppercase tracking-widest text-teal-700">
           Medical Leadership
         </p>
         <h3 className="mt-2 text-2xl font-semibold text-slate-950">
           {doctor.name}
         </h3>
         {doctor.degree && !doctor.degree.startsWith("[") ? (
-          <p className="mt-1 font-medium text-slate-600">{doctor.degree}</p>
+          <p className="mt-1 text-sm font-semibold text-slate-500">{doctor.degree}</p>
+        ) : null}
+        {regNo ? (
+          <p className="mt-1 text-xs text-slate-400">Reg No: {regNo}</p>
         ) : null}
         <p className="mt-4 text-sm leading-6 text-slate-600">{doctor.bio}</p>
         <a href={getDoctorCallUrl(doctor.phone)} className="btn-secondary mt-5 w-full">

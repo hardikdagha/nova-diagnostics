@@ -71,44 +71,47 @@ export default function HomeSampleCollectionPage() {
       <section className="bg-[linear-gradient(135deg,#FAFCFD_0%,#E6F7FA_100%)] py-12 md:py-16">
         <div className="container-page">
           <Breadcrumbs items={[{ label: "Home Sample Collection" }]} />
-          <div className="grid gap-10 lg:grid-cols-[1fr_0.9fr] lg:items-center">
-            <div>
-              <p className="text-sm font-semibold uppercase text-teal-700">
-                Home sample collection
-              </p>
-              <h1 className="mt-3 text-balance text-4xl font-semibold leading-tight text-slate-950 md:text-5xl">
-                Blood Tests at Home — Vashi and Nearby Navi Mumbai
-              </h1>
-              <p className="mt-5 text-lg leading-8 text-slate-600">
-                Book convenient home sample collection for lab tests and health packages with Nova Diagnostics.
-              </p>
-              <div className="mt-7 flex flex-wrap gap-3">
-                <a href={getWhatsappUrl("Hello Nova Diagnostics, I would like to book home sample collection.")} className="btn-primary">
-                  <MessageCircle className="size-4" aria-hidden="true" />
-                  WhatsApp Booking
-                </a>
-                <Link href="/upload-prescription" className="btn-secondary">
-                  Upload Prescription
-                </Link>
-              </div>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
-              {[
-                ["1", "Choose test or upload prescription"],
-                ["2", "Select preferred slot"],
-                ["3", "Sample collected from home and report shared digitally"],
-              ].map(([number, text]) => (
-                <div key={number} className="card-premium p-5">
-                  <span className="flex size-10 items-center justify-center rounded-[8px] bg-[#061A33] font-semibold text-white">
-                    {number}
-                  </span>
-                  <p className="mt-4 font-semibold leading-6 text-slate-950">{text}</p>
-                </div>
-              ))}
+          <div className="max-w-2xl">
+            <p className="text-sm font-semibold uppercase text-teal-700">
+              Home sample collection
+            </p>
+            <h1 className="mt-3 text-balance text-4xl font-semibold leading-tight text-slate-950 md:text-5xl">
+              Blood tests at home, coordinated by Nova Diagnostics.
+            </h1>
+            <p className="mt-5 text-lg leading-8 text-slate-600">
+              Request a home sample collection slot and our team will confirm availability before the visit. Available across Vashi and nearby Navi Mumbai areas.
+            </p>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <a href={getWhatsappUrl("Hello Nova Diagnostics, I would like to book home sample collection.")} className="btn-primary">
+                <MessageCircle className="size-4" aria-hidden="true" />
+                WhatsApp Booking
+              </a>
+              <Link href="/upload-prescription" className="btn-secondary">
+                Upload Prescription
+              </Link>
             </div>
           </div>
         </div>
       </section>
+
+      {/* Steps strip */}
+      <div className="border-b border-slate-100 bg-white">
+        <div className="container-page">
+          <div className="grid divide-x divide-slate-100 sm:grid-cols-3">
+            {[
+              ["1", "Request a slot", "Fill the form or WhatsApp with your test name or prescription."],
+              ["2", "Team confirms", "Staff confirms slot availability and preparation instructions."],
+              ["3", "Sample collected", "Phlebotomist visits and reports are shared digitally."],
+            ].map(([n, title, desc]) => (
+              <div key={n} className="px-6 py-6">
+                <span className="inline-flex size-7 items-center justify-center rounded-full bg-[#061A33] text-xs font-bold text-white">{n}</span>
+                <p className="mt-3 font-semibold text-slate-950">{title}</p>
+                <p className="mt-1 text-sm leading-6 text-slate-500">{desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
 
       <section className="section-pad">
         <div className="container-page grid gap-10 lg:grid-cols-[0.8fr_1.2fr]">

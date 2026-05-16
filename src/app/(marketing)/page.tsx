@@ -1,26 +1,24 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
   CalendarCheck,
   ClipboardList,
+  FileText,
   FileUp,
   FlaskConical,
-  HeartHandshake,
   Home,
-  MapPinned,
+  Link2,
   ShieldCheck,
-  Sparkles,
-  Timer,
+  User,
 } from "lucide-react";
 import { FAQAccordion } from "@/components/ui/FAQAccordion";
 import { MapBlock } from "@/components/ui/MapBlock";
-import { ReviewCTA } from "@/components/ui/ReviewCTA";
 import { HeroSection } from "@/components/sections/HeroSection";
 import { CTASection } from "@/components/ui/CTASection";
 import { siteConfig } from "@/config/site";
 import { safeJsonLd } from "@/lib/utils";
+import Image from "next/image";
 
 export const metadata: Metadata = {
   title: {
@@ -89,13 +87,6 @@ const services = [
   },
 ];
 
-const whyPoints = [
-  { icon: ShieldCheck, label: "Careful processes", text: "Sample handling, reporting and communication done methodically." },
-  { icon: MapPinned, label: "Accessible location", text: "Conveniently located in Sector-14, Vashi." },
-  { icon: HeartHandshake, label: "Patient-first care", text: "Warm, attentive support for patients and families." },
-  { icon: Sparkles, label: "Clean environment", text: "A calm, hygienic space designed for patient comfort." },
-];
-
 export default function HomePage() {
   const jsonLd = {
     "@context": "https://schema.org",
@@ -132,10 +123,10 @@ export default function HomePage() {
         <div className="container-page">
           <dl className="grid grid-cols-2 divide-x divide-y divide-slate-100 lg:grid-cols-4 lg:divide-y-0">
             {[
-              ["34+", "Years of service"],
-              ["8+", "Areas served"],
+              ["34+", "Years of experience"],
               ["Home", "Sample collection"],
-              ["Digital", "Report sharing"],
+              ["Digital", "Report delivery"],
+              ["Vashi", "Navi Mumbai"],
             ].map(([value, label]) => (
               <div key={label} className="flex flex-col items-center px-6 py-7 text-center">
                 <dt className="text-2xl font-bold text-[#061A33] md:text-3xl">{value}</dt>
@@ -150,9 +141,9 @@ export default function HomePage() {
       <section className="section-pad bg-[#FAFCFD]">
         <div className="container-page">
           <div className="mb-12 text-center">
-            <p className="text-sm font-semibold uppercase tracking-widest text-teal-700">Our Services</p>
+            <p className="text-sm font-semibold uppercase tracking-widest text-teal-700">Services</p>
             <h2 className="mt-3 text-3xl font-semibold text-slate-950 md:text-4xl">
-              Everything you need, in one place
+              Diagnostics made simpler for patients and families.
             </h2>
           </div>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -170,42 +161,9 @@ export default function HomePage() {
                   <h3 className="mt-5 text-lg font-semibold text-slate-950">{s.title}</h3>
                   <p className="mt-2 flex-1 text-sm leading-6 text-slate-500">{s.description}</p>
                   <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-teal-700 transition group-hover:gap-2.5">
-                    Learn more <ArrowRight className="size-4" />
+                    <ArrowRight className="size-4" aria-hidden="true" />
                   </span>
                 </Link>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Why Nova Diagnostics ─────────────────────────────── */}
-      <section className="section-pad bg-white">
-        <div className="container-page grid gap-12 lg:grid-cols-2 lg:items-center">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-widest text-teal-700">Why Nova Diagnostics</p>
-            <h2 className="mt-3 text-balance text-3xl font-semibold text-slate-950 md:text-4xl">
-              Care, clarity and convenience — in one local lab
-            </h2>
-            <p className="mt-5 text-lg leading-8 text-slate-500">
-              A diagnostic laboratory built around patient trust. Careful processes, honest communication and a team that genuinely supports you at every step.
-            </p>
-            <Link href="/about" className="btn-primary mt-8">
-              About the lab
-              <ArrowRight className="size-4" aria-hidden="true" />
-            </Link>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {whyPoints.map((p) => {
-              const Icon = p.icon;
-              return (
-                <div key={p.label} className="card-premium p-6">
-                  <span className="flex size-10 items-center justify-center rounded-[8px] bg-cyan-50 text-teal-700">
-                    <Icon className="size-5" aria-hidden="true" />
-                  </span>
-                  <h3 className="mt-4 font-semibold text-slate-950">{p.label}</h3>
-                  <p className="mt-2 text-sm leading-6 text-slate-500">{p.text}</p>
-                </div>
               );
             })}
           </div>
@@ -254,13 +212,40 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── Digital reports ──────────────────────────────────── */}
+      <section className="section-pad bg-white">
+        <div className="container-page grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-widest text-teal-700">Patient portal</p>
+            <h2 className="mt-3 text-balance text-3xl font-semibold text-slate-950 md:text-4xl">Reports made simple and secure.</h2>
+            <p className="mt-5 text-lg leading-8 text-slate-500">Patients can receive secure report download links, or access reports linked to their verified email. Reports can also be shared by staff via WhatsApp.</p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link href="/patient/login" className="btn-primary">Patient Login <ArrowRight className="size-4" aria-hidden="true" /></Link>
+              <Link href="/reports" className="btn-secondary">Download Report <FileText className="size-4" aria-hidden="true" /></Link>
+            </div>
+          </div>
+          <div className="grid gap-4">
+            {[
+              { icon: Link2, title: "Secure download links", desc: "Reports shared via WhatsApp or email include a time-limited secure link." },
+              { icon: User, title: "Patient login", desc: "Registered patients can log in with their email to view reports linked to their account." },
+              { icon: ShieldCheck, title: "Staff-verified sharing", desc: "Reports are shared only through confirmed lab processes, not automated uploads." },
+            ].map(({ icon: Icon, title, desc }) => (
+              <div key={title} className="flex gap-4 rounded-xl border border-slate-100 bg-slate-50 p-5">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-white text-teal-700 shadow-sm"><Icon className="size-5" aria-hidden="true" /></span>
+                <div><p className="font-semibold text-slate-950">{title}</p><p className="mt-1 text-sm leading-6 text-slate-500">{desc}</p></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ── Medical leadership teaser ────────────────────────── */}
       <section className="section-pad bg-[#FAFCFD]">
         <div className="container-page">
           <div className="mb-12 text-center">
-            <p className="text-sm font-semibold uppercase tracking-widest text-teal-700">Medical Leadership</p>
+            <p className="text-sm font-semibold uppercase tracking-widest text-teal-700">Medical leadership</p>
             <h2 className="mt-3 text-3xl font-semibold text-slate-950 md:text-4xl">
-              Guided by experience and care
+              Doctor-guided diagnostic care.
             </h2>
             <p className="mt-4 max-w-2xl mx-auto text-lg text-slate-500">
               Nova Diagnostics is shaped by medical leadership committed to diagnostic accuracy and patient-centred care.
@@ -289,21 +274,7 @@ export default function HomePage() {
               Visit us in Vashi
             </h2>
           </div>
-          <div className="grid gap-6 lg:grid-cols-[1.4fr_0.6fr]">
-            <MapBlock />
-            <div className="grid gap-6">
-              <ReviewCTA />
-              <div className="card-premium p-6">
-                <Timer className="size-8 text-teal-700" aria-hidden="true" />
-                <h3 className="mt-4 text-lg font-semibold text-slate-950">Timings</h3>
-                <p className="mt-2 text-sm leading-6 text-slate-500">
-                  {siteConfig.timings && !siteConfig.timings.startsWith("[")
-                    ? siteConfig.timings
-                    : "Please call or WhatsApp for current lab timings."}
-                </p>
-              </div>
-            </div>
-          </div>
+          <MapBlock />
         </div>
       </section>
 
@@ -343,7 +314,7 @@ function DoctorTeaser({ doctor }: { doctor: typeof siteConfig.doctors[0] }) {
 
   return (
     <div className="card-premium flex items-center gap-5 p-5">
-      <div className="relative size-20 shrink-0 overflow-hidden rounded-[8px] bg-gradient-to-br from-slate-100 to-cyan-50">
+      <div className="relative size-20 shrink-0 overflow-hidden rounded-[8px] bg-[#061A33]">
         {doctor.imageAvailable !== false ? (
           <Image
             src={doctor.image}
@@ -354,7 +325,7 @@ function DoctorTeaser({ doctor }: { doctor: typeof siteConfig.doctors[0] }) {
             unoptimized
           />
         ) : (
-          <span className="flex size-full items-center justify-center text-lg font-bold text-[#061A33]">
+          <span className="flex size-full items-center justify-center text-lg font-bold text-white">
             {initials}
           </span>
         )}

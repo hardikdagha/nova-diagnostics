@@ -81,29 +81,22 @@ export default function ContactPage() {
       <section className="section-pad">
         <div className="container-page grid gap-10 lg:grid-cols-[0.95fr_1.05fr]">
           <div className="space-y-6">
-            <div className="grid gap-4">
+            <div className="card-premium divide-y divide-slate-100">
               {contactItems.map((item) => {
                 const Icon = item.icon;
                 const body = (
-                  <div className="card-premium flex gap-4 p-5">
-                    <span className="flex size-11 shrink-0 items-center justify-center rounded-[8px] bg-cyan-50 text-teal-700">
+                  <div className="flex gap-4 p-5">
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-teal-700">
                       <Icon className="size-5" aria-hidden="true" />
                     </span>
-                    <div>
-                      <p className="text-sm font-semibold uppercase text-slate-500">
-                        {item.label}
-                      </p>
-                      <p className="mt-1 font-semibold leading-6 text-slate-950">
-                        {item.value}
-                      </p>
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{item.label}</p>
+                      <p className="mt-0.5 font-medium text-slate-950 leading-6">{item.value}</p>
                     </div>
                   </div>
                 );
-
                 return item.href ? (
-                  <a key={item.label} href={item.href}>
-                    {body}
-                  </a>
+                  <a key={item.label} href={item.href} className="block hover:bg-slate-50 transition">{body}</a>
                 ) : (
                   <div key={item.label}>{body}</div>
                 );
@@ -128,7 +121,7 @@ export default function ContactPage() {
                   <a
                     key={doctor.name}
                     href={getDoctorCallUrl(doctor.phone)}
-                    className="rounded-[8px] border border-slate-200 bg-white p-4 transition hover:border-teal-200 hover:bg-cyan-50"
+                    className="rounded-[8px] border border-slate-200 bg-white p-4 transition hover:bg-slate-50"
                   >
                     <span className="block font-semibold text-slate-950">{doctor.name}</span>
                     <span className="mt-1 block text-sm text-slate-600">
@@ -147,7 +140,7 @@ export default function ContactPage() {
       </section>
 
       <section className="section-pad bg-white">
-        <div className="container-page grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
+        <div className="container-page grid gap-8 lg:grid-cols-[1fr_1fr] lg:items-start">
           <SectionHeading
             eyebrow="Directions"
             title="Visit the lab in Vashi"

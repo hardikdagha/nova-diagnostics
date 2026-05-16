@@ -35,10 +35,10 @@ export default function UploadPrescriptionPage() {
                 Prescription help
               </p>
               <h1 className="mt-3 text-balance text-4xl font-semibold leading-tight text-slate-950 md:text-5xl">
-                Upload your prescription for test-list assistance
+                Upload your prescription for test-list assistance.
               </h1>
               <p className="mt-5 text-lg leading-8 text-slate-600">
-                Upload your prescription and Nova Diagnostics will help you identify the required tests and booking options.
+                Share your prescription and our team will help identify the required tests and booking options.
               </p>
               <div className="mt-7 flex flex-wrap gap-3">
                 <a href={getWhatsappUrl("Hello Nova Diagnostics, I need help with tests on my prescription.")} className="btn-primary">
@@ -94,6 +94,28 @@ export default function UploadPrescriptionPage() {
             </div>
           </div>
           <PrescriptionUploadForm />
+        </div>
+      </section>
+
+      <section className="section-pad bg-white">
+        <div className="container-page max-w-2xl">
+          <p className="text-sm font-semibold uppercase tracking-widest text-teal-700">What happens next</p>
+          <h2 className="mt-3 text-2xl font-semibold text-slate-950">How the prescription review works</h2>
+          <ol className="mt-8 grid gap-4">
+            {[
+              ["Upload prescription", "Share a PDF, JPG or PNG of your prescription through the request form."],
+              ["Staff reviews test names", "The Nova Diagnostics team reviews the tests listed and identifies what's needed."],
+              ["Team contacts you for booking", "We reach out via your preferred method — WhatsApp, call or email — to confirm tests, preparation and booking options."],
+            ].map(([title, desc], i) => (
+              <li key={title} className="flex gap-4">
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#061A33] text-sm font-bold text-white">{i + 1}</span>
+                <div className="pt-0.5">
+                  <p className="font-semibold text-slate-950">{title}</p>
+                  <p className="mt-1 text-sm leading-6 text-slate-500">{desc}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
         </div>
       </section>
     </>

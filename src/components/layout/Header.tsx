@@ -58,7 +58,7 @@ export function Header() {
             <MapPin className="size-3.5 text-cyan-200" aria-hidden="true" />
             {siteConfig.area}, {siteConfig.city}
           </span>
-          <span>Home sample collection available</span>
+          <span className="hidden sm:inline">Home sample collection available</span>
           <a href={getCallUrl()} className="inline-flex items-center gap-2 hover:text-cyan-100">
             <Phone className="size-3.5 text-cyan-200" aria-hidden="true" />
             Call: {siteConfig.displayPhone}
@@ -71,7 +71,7 @@ export function Header() {
         <BrandLogo variant="header" />
 
         {/* Desktop marketing nav — original items, whitespace-nowrap to prevent wrapping */}
-        <nav className="hidden items-center gap-1 lg:flex" aria-label="Main navigation">
+        <nav className="hidden items-center gap-0.5 lg:flex" aria-label="Main navigation">
           {navigation.map((item) => {
             const active =
               item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
@@ -81,7 +81,7 @@ export function Header() {
                 href={item.href}
                 className={cn(
                   "whitespace-nowrap rounded-[8px] px-3 py-2 text-sm font-semibold text-slate-600 transition hover:bg-cyan-50 hover:text-teal-800",
-                  active && "bg-cyan-50 text-teal-800",
+                  active && "bg-[#061A33]/8 text-[#061A33]",
                 )}
               >
                 {item.label}
@@ -124,7 +124,7 @@ export function Header() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="rounded-[8px] px-3 py-3 text-sm font-semibold text-slate-700 hover:bg-cyan-50 hover:text-teal-800"
+                className="rounded-[8px] px-3 py-3.5 text-sm font-semibold text-slate-700 hover:bg-cyan-50 hover:text-teal-800"
                 onClick={() => setIsOpen(false)}
               >
                 {item.label}
@@ -135,7 +135,7 @@ export function Header() {
             <Link
               href={patientHref}
               className={cn(
-                "flex items-center gap-2 rounded-[8px] px-3 py-3 text-sm font-semibold text-teal-700 hover:bg-teal-50",
+                "flex items-center gap-2 rounded-[8px] px-3 py-3.5 text-sm font-semibold text-teal-700 hover:bg-teal-50",
                 isPatientRoute && "bg-teal-50",
               )}
               onClick={() => setIsOpen(false)}

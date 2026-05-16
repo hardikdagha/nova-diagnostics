@@ -27,10 +27,10 @@ export default function TestsPage() {
             <SectionHeading
               eyebrow="Test catalogue"
               level="h1"
-              title="Search lab tests before you book"
-              description="Browse routine blood tests, diabetes monitoring, thyroid profiles, vitamins, fever tests and more. Contact the lab to confirm current pricing and availability."
+              title="Search lab tests before you book."
+              description="Browse routinely requested blood tests, diabetes monitoring, thyroid profiles, vitamins, fever tests and more. Contact the lab for current pricing and booking."
             />
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid gap-3 sm:grid-cols-2 lg:max-w-xs">
               <a href={getWhatsappUrl("Hello Nova Diagnostics, I would like help booking a test.")} className="btn-primary">
                 <MessageCircle className="size-4" aria-hidden="true" />
                 Book via WhatsApp

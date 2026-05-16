@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import { CheckCircle2, ClipboardList, FileText, HeartHandshake, Home, MapPin, Microscope, Phone, Timer } from "lucide-react";
+import { CheckCircle2, HeartHandshake, MapPin, Microscope, Phone, Timer } from "lucide-react";
 import { MedicalLeadership } from "@/components/people/MedicalLeadership";
 import { TeamSection } from "@/components/people/TeamSection";
-import { BrandLogo } from "@/components/ui/BrandLogo";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { CTASection } from "@/components/ui/CTASection";
 import { SectionHeading } from "@/components/ui/SectionHeading";
@@ -49,11 +48,18 @@ export default function AboutPage() {
                 Call {siteConfig.displayPhone}
               </a>
             </div>
-            <div className="card-premium flex flex-col items-center p-8 text-center">
-              <BrandLogo variant="feature" />
-              <p className="mt-5 text-sm leading-6 text-slate-500">
-                A pathology and diagnostics laboratory in Vashi, Navi Mumbai — focused on clear test information, patient support and quality diagnostic services.
-              </p>
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-2">
+              {[
+                ["34+", "Years of service"],
+                ["Vashi", "Navi Mumbai"],
+                ["Home", "Sample collection"],
+                ["Digital", "Report delivery"],
+              ].map(([val, lbl]) => (
+                <div key={lbl} className="rounded-xl border border-teal-100 bg-white/60 p-5 text-center backdrop-blur">
+                  <p className="text-2xl font-bold text-[#061A33]">{val}</p>
+                  <p className="mt-1 text-sm text-slate-600">{lbl}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -73,45 +79,23 @@ export default function AboutPage() {
               <TrustBadge icon={Timer} label="Timely reporting focus" />
               <TrustBadge icon={HeartHandshake} label="Patient-first support" />
             </div>
+            <ul className="mt-8 grid gap-3 sm:grid-cols-2">
+              {[
+                "Blood tests and routine diagnostics",
+                "Health packages and preventive checkups",
+                "Home sample collection",
+                "Prescription support and test identification",
+                "Digital report sharing",
+                "Patient-friendly booking support",
+              ].map((item) => (
+                <li key={item} className="flex items-center gap-3 rounded-lg border border-slate-100 bg-white px-4 py-3 text-sm font-medium text-slate-700">
+                  <CheckCircle2 className="size-4 shrink-0 text-teal-700" aria-hidden="true" />
+                  {item}
+                </li>
+              ))}
+            </ul>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="card-premium flex flex-col gap-3 p-6">
-              <span className="flex size-11 items-center justify-center rounded-[8px] bg-cyan-50 text-teal-700">
-                <Microscope className="size-6" aria-hidden="true" />
-              </span>
-              <h3 className="text-lg font-semibold text-slate-950">Diagnostic laboratory</h3>
-              <p className="text-sm leading-6 text-slate-600">
-                Blood tests, health packages and routine diagnostic services for patients in Vashi and nearby Navi Mumbai areas.
-              </p>
-            </div>
-            <div className="card-premium flex flex-col gap-3 p-6">
-              <span className="flex size-11 items-center justify-center rounded-[8px] bg-cyan-50 text-teal-700">
-                <Home className="size-6" aria-hidden="true" />
-              </span>
-              <h3 className="text-lg font-semibold text-slate-950">Home sample collection</h3>
-              <p className="text-sm leading-6 text-slate-600">
-                Convenient home collection across selected Navi Mumbai areas including Vashi, Sanpada, Nerul and more.
-              </p>
-            </div>
-            <div className="card-premium flex flex-col gap-3 p-6">
-              <span className="flex size-11 items-center justify-center rounded-[8px] bg-cyan-50 text-teal-700">
-                <FileText className="size-6" aria-hidden="true" />
-              </span>
-              <h3 className="text-lg font-semibold text-slate-950">Digital reports</h3>
-              <p className="text-sm leading-6 text-slate-600">
-                Reports can be shared digitally through defined lab processes for convenient access from home.
-              </p>
-            </div>
-            <div className="card-premium flex flex-col gap-3 p-6">
-              <span className="flex size-11 items-center justify-center rounded-[8px] bg-cyan-50 text-teal-700">
-                <ClipboardList className="size-6" aria-hidden="true" />
-              </span>
-              <h3 className="text-lg font-semibold text-slate-950">Prescription support</h3>
-              <p className="text-sm leading-6 text-slate-600">
-                Upload your prescription and our team helps identify the required tests and assists with booking.
-              </p>
-            </div>
-          </div>
+          <div className="hidden lg:block" />
         </div>
       </section>
 
@@ -126,36 +110,42 @@ export default function AboutPage() {
             title="Built around calm processes and clear communication"
             description="At Nova Diagnostics, every process is shaped by patient comfort, careful sample handling, timely reporting and clear communication."
           />
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="flex flex-wrap gap-2">
             {focusAreas.map((item) => (
-              <div key={item} className="card-premium flex items-center gap-3 p-5">
-                <CheckCircle2 className="size-5 shrink-0 text-teal-700" aria-hidden="true" />
-                <span className="font-semibold text-slate-950">{item}</span>
-              </div>
+              <span key={item} className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700">
+                <CheckCircle2 className="size-3.5 shrink-0 text-teal-700" aria-hidden="true" />
+                {item}
+              </span>
             ))}
           </div>
         </div>
       </section>
 
       <section className="section-pad">
-        <div className="container-page grid gap-8 lg:grid-cols-2">
-          <div className="card-premium p-6 md:p-8">
-            <MapPin className="size-10 text-teal-700" aria-hidden="true" />
-            <h2 className="mt-4 text-2xl font-semibold text-slate-950">
-              Location and Accessibility
-            </h2>
-            <p className="mt-4 leading-7 text-slate-600">
-              {siteConfig.address}
-            </p>
-          </div>
-          <div className="card-premium p-6 md:p-8">
-            <HeartHandshake className="size-10 text-teal-700" aria-hidden="true" />
-            <h2 className="mt-4 text-2xl font-semibold text-slate-950">
-              Support for local patients
-            </h2>
-            <p className="mt-4 leading-7 text-slate-600">
-              Patients can call, WhatsApp, upload prescriptions, request home collection and get directions without navigating a complex portal.
-            </p>
+        <div className="container-page">
+          <div className="card-premium divide-y divide-slate-100 overflow-hidden">
+            <div className="flex gap-6 p-6 md:p-8">
+              <MapPin className="mt-1 size-8 shrink-0 text-teal-700" aria-hidden="true" />
+              <div>
+                <h2 className="text-xl font-semibold text-slate-950">
+                  Location and Accessibility
+                </h2>
+                <p className="mt-3 leading-7 text-slate-600">
+                  {siteConfig.address}
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-6 p-6 md:p-8">
+              <HeartHandshake className="mt-1 size-8 shrink-0 text-teal-700" aria-hidden="true" />
+              <div>
+                <h2 className="text-xl font-semibold text-slate-950">
+                  Support for local patients
+                </h2>
+                <p className="mt-3 leading-7 text-slate-600">
+                  Patients can call, WhatsApp, upload prescriptions, request home collection and get directions without navigating a complex portal.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
