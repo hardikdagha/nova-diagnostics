@@ -36,7 +36,7 @@ const homeFaqs = [
   {
     question: "Do I need fasting for all blood tests?",
     answer:
-      "No. Many routine tests do not need fasting. Some sugar and lipid tests may require it. Confirm preparation while booking.",
+      "No. Many routine tests do not require fasting. However, some tests do have specific requirements. Lipid Profile usually requires 12–14 hours fasting, Full Body Checkup requires 12 hours fasting, and Post Prandial Blood Sugar sample is collected 2 hours after a meal. Our team will confirm preparation instructions while booking.",
   },
   {
     question: "Do you provide home sample collection?",

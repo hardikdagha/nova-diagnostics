@@ -4,7 +4,7 @@ export type HealthPackage = {
   idealFor: string;
   description: string;
   includedTests: string[];
-  fasting: "Yes" | "No" | "As advised";
+  fasting: string;
   reportTime: string;
   price: string;
   highlight?: string;
@@ -30,7 +30,7 @@ export const packages: HealthPackage[] = [
     description:
       "A broader preventive checkup combining commonly requested blood and urine screening groups.",
     includedTests: ["CBC", "Sugar profile", "Lipid profile", "Liver screening", "Kidney screening", "Vitamin screening"],
-    fasting: "As advised",
+    fasting: "12 hours fasting required",
     reportTime: "Same day or next day",
     price: "Contact for price",
     highlight: "Popular preventive option",

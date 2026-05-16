@@ -15,7 +15,7 @@ export type LabTest = {
   category: TestCategory;
   description: string;
   sampleType: string;
-  fasting: "Yes" | "No" | "As advised";
+  fasting: string;
   reportTime: string;
   price: string;
   homeCollection: boolean;
@@ -158,9 +158,9 @@ export const tests: LabTest[] = [
     slug: "post-prandial-blood-sugar",
     category: "Diabetes",
     description:
-      "A blood sugar test commonly collected after meals as advised by a doctor.",
+      "A blood sugar test collected 2 hours after a meal as part of diabetes evaluation or follow-up.",
     sampleType: "Blood",
-    fasting: "As advised",
+    fasting: "2 hours after meal",
     reportTime: "Same day",
     price: "Contact for price",
     homeCollection: true,
@@ -172,8 +172,9 @@ export const tests: LabTest[] = [
       "Doctor-advised sugar profile",
     ],
     preparation: [
-      "Follow the sample timing advised by your doctor.",
-      "Mention meal and medicine timing to the lab team if relevant.",
+      "Sample should be collected 2 hours after meal.",
+      "Inform the lab team of your meal time when arriving for the test.",
+      "Mention current medicines to the lab team if relevant.",
     ],
     relatedTests: ["fasting-blood-sugar", "hba1c", "lipid-profile"],
   },
@@ -184,7 +185,7 @@ export const tests: LabTest[] = [
     description:
       "A heart-health screening profile used to review cholesterol-related markers.",
     sampleType: "Blood",
-    fasting: "As advised",
+    fasting: "12–14 hours fasting required",
     reportTime: "Same day or next day",
     price: "Contact for price",
     homeCollection: true,
@@ -196,8 +197,10 @@ export const tests: LabTest[] = [
       "Family history of heart health concerns",
     ],
     preparation: [
-      "Fasting may be advised for some lipid testing.",
-      "Confirm preparation instructions while booking.",
+      "12–14 hours fasting is required before the test.",
+      "Drink water — staying hydrated is fine during the fasting period.",
+      "Avoid food, tea, coffee, and juice during the fasting window.",
+      "Confirm exact preparation instructions while booking.",
     ],
     relatedTests: ["hba1c", "liver-function-test", "kidney-function-test"],
   },

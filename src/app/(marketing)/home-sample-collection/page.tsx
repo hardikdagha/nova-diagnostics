@@ -56,7 +56,7 @@ const faqs = [
   {
     question: "Do I need to fast before home collection?",
     answer:
-      "Only some tests require fasting. Confirm preparation instructions when the team confirms your booking.",
+      "Fasting requirements depend on the test. Lipid Profile requires 12–14 hours fasting, Full Body Checkup requires 12 hours fasting, and Post Prandial Blood Sugar is collected 2 hours after a meal. Many other routine tests do not require fasting. Our team will confirm exact preparation instructions before the visit.",
   },
   {
     question: "Are uploaded prescriptions stored?",

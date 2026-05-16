@@ -153,7 +153,14 @@ export default async function PackageDetailPage({ params }: PageProps) {
             <section>
               <h2 className="text-2xl font-semibold text-slate-950">Preparation and collection</h2>
               <p className="mt-4 leading-7 text-slate-600">
-                Fasting requirement: {healthPackage.fasting}. Confirm exact preparation instructions and sample timing while booking, especially if this package includes sugar or lipid-related testing.
+                {healthPackage.fasting === "No"
+                  ? "Fasting is generally not required for this package."
+                  : healthPackage.fasting === "Yes"
+                    ? "Fasting is required for this package."
+                    : healthPackage.fasting === "As advised"
+                      ? "Fasting requirement is as advised by your doctor or the lab team."
+                      : `${healthPackage.fasting}.`}{" "}
+                Confirm exact preparation instructions and sample timing while booking, especially if this package includes sugar or lipid-related testing.
               </p>
             </section>
             <section>

@@ -70,7 +70,7 @@ export default async function TestDetailPage({ params }: PageProps) {
           ? "Fasting is usually required. Confirm exact preparation instructions while booking."
           : test.fasting === "No"
             ? "Fasting is usually not required unless your doctor gives specific instructions."
-            : "Preparation can vary. Confirm fasting instructions with the lab team while booking.",
+            : `${test.fasting}. Confirm exact preparation details with the lab team while booking.`,
     },
     {
       question: "Is home collection available?",
