@@ -57,6 +57,7 @@ function AdminReportsContent() {
   // newToken holds the raw token after a regeneration action in this session.
   const [newToken, setNewToken] = useState<string | null>(null);
   const activeToken = newToken ?? selected?.token ?? null;
+  const [waExpanded, setWaExpanded] = useState(true);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -82,6 +83,7 @@ function AdminReportsContent() {
       setDlPhase("idle");
       setDlUrl(null);
       setNewToken(null);
+      setWaExpanded(true);
     })();
   }, [selectedId, reports]);
 
@@ -263,14 +265,22 @@ function AdminReportsContent() {
                 <Link2 className="size-3.5" />
                 {newToken ? "New link generated" : "Report link"}
               </div>
-              <a
-                href={`https://novadiagnosticslab.com/r/?t=${activeToken}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 text-xs font-medium text-teal-600 hover:text-teal-800"
-              >
-                <ExternalLink className="size-3.5" /> Test link
-              </a>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setWaExpanded(!waExpanded)}
+                  className="text-xs font-medium text-slate-400 hover:text-slate-700"
+                >
+                  {waExpanded ? "Hide message" : "Show message"}
+                </button>
+                <a
+                  href={`https://novadiagnosticslab.com/r/?t=${activeToken}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-xs font-medium text-teal-600 hover:text-teal-800"
+                >
+                  <ExternalLink className="size-3.5" /> Test link
+                </a>
+              </div>
             </div>
             {/* Shareable URL */}
             <div className="border-b border-slate-50 px-5 py-3">
@@ -279,9 +289,11 @@ function AdminReportsContent() {
                 {`https://novadiagnosticslab.com/r/?t=${activeToken}`}
               </p>
             </div>
-            <pre className="whitespace-pre-wrap break-all px-5 py-4 text-sm leading-7 text-slate-700">
-              {buildMessage(selected, activeToken)}
-            </pre>
+            {waExpanded && (
+              <pre className="whitespace-pre-wrap break-all border-b border-slate-50 px-5 py-4 text-sm leading-7 text-slate-700">
+                {buildMessage(selected, activeToken)}
+              </pre>
+            )}
             <div className="space-y-3 border-t border-slate-100 px-5 py-4">
               {/* WhatsApp copy */}
               <button onClick={copyMessage} className="btn-primary w-full gap-2">

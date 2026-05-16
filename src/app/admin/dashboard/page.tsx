@@ -239,12 +239,23 @@ export default function AdminDashboardPage() {
             bg: "bg-sky-50",
           },
         ].map(({ label, value, icon: Icon, href, color, bg }) => (
-          <Link key={label} href={href} className="card-premium group flex items-center gap-4 border border-slate-100 p-5 transition-colors hover:bg-slate-50">
+          <Link
+            key={label}
+            href={href}
+            className={`card-premium group relative flex items-center gap-4 border p-5 transition-colors hover:bg-slate-50 ${
+              value > 0 ? "border-sky-200 bg-sky-50/30" : "border-slate-100"
+            }`}
+          >
+            {value > 0 && (
+              <span className="absolute right-3 top-3 flex size-2 rounded-full bg-sky-400">
+                <span className="absolute inline-flex size-full animate-ping rounded-full bg-sky-400 opacity-60" />
+              </span>
+            )}
             <div className={`flex size-11 shrink-0 items-center justify-center rounded-xl ${bg}`}>
               <Icon className={`size-5 ${color}`} />
             </div>
             <div className="flex-1">
-              <p className="text-3xl font-bold text-slate-950">{value}</p>
+              <p className={`text-3xl font-bold ${value > 0 ? "text-sky-700" : "text-slate-950"}`}>{value}</p>
               <p className="mt-0.5 text-xs font-medium uppercase tracking-wide text-slate-400">{label}</p>
             </div>
             <ChevronRight className="size-4 text-slate-300 transition-colors group-hover:text-slate-500" />

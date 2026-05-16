@@ -154,10 +154,16 @@ export default function PrescriptionRequestsPage() {
                   <button
                     key={r.id}
                     onClick={() => openDetail(r)}
-                    className={`w-full px-5 py-3.5 text-left transition-colors hover:bg-slate-50 ${isSelected ? "border-l-2 border-[#061A33] bg-[#061A33]/5" : ""}`}
+                    className={`w-full px-5 py-3.5 text-left transition-colors hover:bg-slate-50 ${
+                      isSelected
+                        ? "border-l-2 border-[#061A33] bg-[#061A33]/5"
+                        : r.status === "New"
+                          ? "border-l-2 border-sky-400 bg-sky-50/40"
+                          : "border-l-2 border-transparent"
+                    }`}
                   >
                     <div className="flex items-start gap-3">
-                      <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-semibold text-slate-600">
+                      <div className={`flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${r.status === "New" ? "bg-sky-100 text-sky-700" : "bg-slate-100 text-slate-600"}`}>
                         {initial}
                       </div>
                       <div className="min-w-0 flex-1">
@@ -194,9 +200,9 @@ export default function PrescriptionRequestsPage() {
 
         {/* Detail panel */}
         {selected ? (
-          <div className="card-premium hidden w-80 shrink-0 overflow-hidden lg:block xl:w-96">
-            {/* Panel header */}
-            <div className="flex items-start justify-between border-b border-slate-100 px-5 py-4">
+          <div className="card-premium sticky top-0 hidden max-h-[calc(100vh-4.5rem)] w-80 shrink-0 flex-col overflow-hidden self-start lg:flex xl:w-96">
+            {/* Panel header — fixed */}
+            <div className="shrink-0 flex items-start justify-between border-b border-slate-100 px-5 py-4">
               <div className="min-w-0">
                 <p className="truncate font-semibold text-slate-950">{selected.full_name}</p>
                 <span className={`mt-1 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_CHIP[selected.status] ?? STATUS_CHIP.Viewed}`}>
@@ -212,7 +218,8 @@ export default function PrescriptionRequestsPage() {
                 <X className="size-4" aria-hidden="true" />
               </button>
             </div>
-            <div className="space-y-4 px-5 py-4 text-sm">
+            {/* Scrollable content */}
+            <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-5 py-4 text-sm">
               {/* Contact buttons */}
               <div className="flex gap-2">
                 <a href={`tel:${selected.mobile}`} className="btn-secondary flex-1 justify-center gap-1.5 text-xs">

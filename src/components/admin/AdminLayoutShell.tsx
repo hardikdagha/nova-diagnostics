@@ -1,10 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import { Activity, ClipboardList, FileText, Home, LogOut, Menu, ScrollText, Upload, X } from "lucide-react";
+
+/** Reports and Upload-Report share a prefix — only highlight "Reports" on the exact path. */
+function isActiveLink(href: string, pathname: string | null): boolean {
+  if (!pathname) return false;
+  const path = pathname.replace(/\/$/, "");
+  if (href === "/admin/reports") return path === "/admin/reports";
+  return path.startsWith(href);
+}
 
 const NAV = [
   { href: "/admin/dashboard",             label: "Dashboard",             icon: Activity },
@@ -118,7 +126,7 @@ export default function AdminLayoutShell({ children }: { children: React.ReactNo
                 href={href}
                 onClick={() => setMenuOpen(false)}
                 className={`flex items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium ${
-                  pathname?.startsWith(href)
+                  isActiveLink(href, pathname)
                     ? "bg-[#061A33]/5 text-[#061A33]"
                     : "text-slate-600 hover:bg-slate-50"
                 }`}
@@ -135,19 +143,29 @@ export default function AdminLayoutShell({ children }: { children: React.ReactNo
         {/* Sidebar — desktop */}
         <aside className="sticky top-14 hidden h-[calc(100vh-3.5rem)] w-60 shrink-0 flex-col overflow-y-auto border-r border-slate-200 bg-white md:flex">
           <nav className="flex flex-col gap-1 p-3 pt-4">
-            {NAV.map(({ href, label, icon: Icon }) => (
-              <Link
-                key={href}
-                href={href}
-                className={`flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                  pathname?.startsWith(href)
-                    ? "bg-[#061A33] text-white shadow-sm"
-                    : "text-slate-600 hover:bg-[#061A33]/5 hover:text-[#061A33]"
-                }`}
-              >
-                <Icon className="size-4" />
-                {label}
-              </Link>
+            {NAV.map(({ href, label, icon: Icon }, i) => (
+              <Fragment key={href}>
+                {/* Visual separator before the "Requests" group */}
+                {i === 3 && (
+                  <div className="mx-1 mt-2 mb-1">
+                    <div className="border-t border-slate-100" />
+                    <p className="mt-2 px-2 text-[10px] font-semibold uppercase tracking-widest text-slate-400">
+                      Requests
+                    </p>
+                  </div>
+                )}
+                <Link
+                  href={href}
+                  className={`flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                    isActiveLink(href, pathname)
+                      ? "bg-[#061A33] text-white shadow-sm"
+                      : "text-slate-600 hover:bg-[#061A33]/5 hover:text-[#061A33]"
+                  }`}
+                >
+                  <Icon className="size-4" />
+                  {label}
+                </Link>
+              </Fragment>
             ))}
           </nav>
           <div className="mt-auto border-t border-slate-100 p-3">
