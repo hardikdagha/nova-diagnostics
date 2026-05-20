@@ -36,7 +36,7 @@ export default function AdminLoginPage() {
       .maybeSingle();
 
     if (!staffRow) {
-      await supabase.auth.signOut();
+      await supabase.auth.signOut({ scope: "local" });
       setError("You do not have staff access. Please contact the administrator.");
       setLoading(false);
       return;

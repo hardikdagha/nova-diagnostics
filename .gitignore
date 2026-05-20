@@ -38,6 +38,10 @@ yarn-error.log*
 # vercel
 .vercel
 
+# local-only context docs (contain credentials — never commit)
+SECRETS.md
+.claude/worktrees/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

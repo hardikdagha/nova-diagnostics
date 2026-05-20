@@ -36,7 +36,7 @@ export const siteConfig = {
       displayPhone: "+91 8898989096",
       degree: "MSc, Microbiology",
       image: "/images/doctors/dr-chandresh-dagha.jpg",
-      imageAvailable: true,
+      imageAvailable: true as boolean,
       bio: "Chandresh Dagha has led Nova Diagnostics for over 34 years, maintaining careful focus on diagnostic quality, methodical laboratory processes, and patient-centred care.",
     },
     {
@@ -45,7 +45,7 @@ export const siteConfig = {
       displayPhone: "+91 9821173323",
       degree: "MBBS, DPB, AFIH, MBA",
       image: "/images/doctors/dr-sujit-singh.jpg",
-      imageAvailable: false,
+      imageAvailable: true as boolean,
       bio: "Dr. Sujeet N. Singh brings clinical expertise to Nova Diagnostics as a consultant pathologist. Reg No: 2003/05/2155.",
     },
   ] satisfies DoctorProfile[],

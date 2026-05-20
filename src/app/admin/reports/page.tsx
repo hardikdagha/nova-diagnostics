@@ -15,6 +15,13 @@ import { inputClass } from "@/components/forms/formStyles";
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
+// Only these staff members can delete reports
+const ADMIN_EMAILS = new Set([
+  "hardikd@novadiagnosticslab.com",
+  "daghac@novadiagnosticslab.com",
+  "sujeetsingh@novadiagnosticslab.com",
+]);
+
 const STATUS_CHIP: Record<string, string> = {
   ready:    "bg-emerald-100 text-emerald-700",
   draft:    "bg-amber-100 text-amber-700",
@@ -54,6 +61,15 @@ function AdminReportsContent() {
   const [dlPhase, setDlPhase] = useState<"idle" | "loading" | "ready">("idle");
   const [dlUrl, setDlUrl] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [canDelete, setCanDelete] = useState(false);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user.email && ADMIN_EMAILS.has(session.user.email)) {
+        setCanDelete(true);
+      }
+    });
+  }, []);
   // newToken holds the raw token after a regeneration action in this session.
   const [newToken, setNewToken] = useState<string | null>(null);
   const activeToken = newToken ?? selected?.token ?? null;
@@ -508,16 +524,18 @@ function AdminReportsContent() {
                 >
                   <Eye className="size-4 text-slate-300 hover:text-slate-500" />
                 </button>
-                <button
-                  onClick={(e) => deleteReport(r, e)}
-                  disabled={deletingId === r.id}
-                  className="rounded p-1 text-slate-300 hover:bg-rose-50 hover:text-rose-500 disabled:opacity-40"
-                  title="Delete report"
-                >
-                  {deletingId === r.id
-                    ? <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-rose-400" />
-                    : <Trash2 className="size-4" />}
-                </button>
+                {canDelete && (
+                  <button
+                    onClick={(e) => deleteReport(r, e)}
+                    disabled={deletingId === r.id}
+                    className="rounded p-1 text-slate-300 hover:bg-rose-50 hover:text-rose-500 disabled:opacity-40"
+                    title="Delete report"
+                  >
+                    {deletingId === r.id
+                      ? <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-rose-400" />
+                      : <Trash2 className="size-4" />}
+                  </button>
+                )}
               </div>
             </div>
           ))}

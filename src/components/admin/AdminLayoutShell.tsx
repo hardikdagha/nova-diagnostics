@@ -49,8 +49,8 @@ export default function AdminLayoutShell({ children }: { children: React.ReactNo
       if (!mounted) return;
 
       if (!data) {
-        // Authenticated but not a staff member — sign out and redirect.
-        await staffSupabase.auth.signOut();
+        // Authenticated but not a staff member — sign out this device and redirect.
+        await staffSupabase.auth.signOut({ scope: "local" });
         router.replace("/admin/login/");
         setChecking(false);
         return;
@@ -100,9 +100,9 @@ export default function AdminLayoutShell({ children }: { children: React.ReactNo
   }, [router]);
 
   const handleSignOut = async () => {
-    // Signs out only the staff session (nova-staff-auth).
-    // The patient session (nova-patient-auth) is untouched.
-    await staffSupabase.auth.signOut();
+    // scope: 'local' signs out this device only — other logged-in devices are unaffected.
+    // The patient session (nova-patient-auth) is also untouched.
+    await staffSupabase.auth.signOut({ scope: "local" });
     router.replace("/admin/login/");
   };
 

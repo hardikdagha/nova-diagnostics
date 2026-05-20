@@ -34,7 +34,7 @@ export function BrandLogo({ variant = "header", className }: BrandLogoProps) {
         </span>
         <span
           aria-hidden="true"
-          className="hidden sm:flex mt-1 items-center gap-1.5 leading-none text-slate-400 text-[8px]"
+          className="flex mt-1 items-center gap-1.5 leading-none text-slate-400 text-[8px]"
         >
           <span className="h-px w-5 bg-slate-300" />
           Committed to Care!

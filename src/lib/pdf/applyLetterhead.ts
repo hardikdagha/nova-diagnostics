@@ -9,19 +9,21 @@ import { PDFDocument, rgb } from "pdf-lib";
  *   0. Solid white rectangle — fills the entire A4 page so the output PDF has no
  *      transparent pixels.  Without this, PDF viewers render transparency as a
  *      gray checkerboard pattern in both the header and footer zones.
- *   1. Crystal Reports content — scaled to fit inside the letterhead's transparent content
- *      area and drawn on top of the white background.
- *   2. Letterhead PNG — painted on top at full A4 size.  Its opaque header and footer
- *      naturally cover any Crystal Reports margins; the transparent body reveals the
- *      report content beneath.  This guarantees zero overlap and zero background tint.
+ *   1. Crystal Reports content — scaled to near-full A4 size (maximum quality,
+ *      minimal scale change) and drawn top-aligned.  The Crystal Reports page's
+ *      own signature marks land in the letterhead's transparent blank-signature
+ *      zone; the Crystal Reports header/footer land under the letterhead's opaque
+ *      header/footer and are covered.
+ *   2. Letterhead PNG — painted on top at full A4 size.
+ *        • Rows    0–159  ( 0–10.7 %): opaque Nova header (covers CR header)
+ *        • Rows  160–1292 (10.7–86.7 %): TRANSPARENT — CR body, blank signature
+ *          area, and actual signature marks all show through (ends at 730pt)
+ *        • Rows 1293–1491 (86.7–100 %): opaque underlines, printed names, footer
  *
- * Content area boundaries (pre-computed from Latest_Temp.png pixel analysis):
- *   Header content ends at row 179/1491 of the PNG → 12.27 % from top (with 4-row buffer)
- *   Footer content starts at row 1171/1491 of the PNG → 78.34 % from top (with 3-row buffer)
- *   Gives ≈ 556 pt of visible content area on A4
- *
- * Crystal Reports PDFs are often Letter-size (612×792 pt).  The content is scaled
- * uniformly to fill the available content-area height, then centred horizontally.
+ * Crystal Reports PDFs are often Letter-size (612×792 pt).
+ * They are scaled uniformly to the maximum size that fits A4, then top-aligned
+ * so that the signature section aligns with the letterhead's signature zone.
+ * This near-1:1 scaling preserves PDF vector quality (no visible degradation).
  *
  * Falls back to the original file unchanged if the letterhead asset is missing.
  */
@@ -29,16 +31,6 @@ import { PDFDocument, rgb } from "pdf-lib";
 // Output page is always A4
 const OUT_W = 595;
 const OUT_H = 842;
-
-// Letterhead content-area boundaries (measured from Latest_Temp.png — 1055×1491 px)
-//   Header content ends at row 179 (+4 buffer) → 12.27 % from top
-//   Footer content begins at row 1171 (-3 buffer) → 78.34 % from top
-const HEADER_END_FRAC = 0.1227;   // header ends at 12.27 % from top  (≈ 103 pt on A4)
-const FOOTER_START_FRAC = 0.7834; // footer starts at 78.34 % from top (≈ 660 pt on A4)
-
-const CONTENT_TOP = HEADER_END_FRAC * OUT_H;      // ≈ 102.7 pt from top
-const CONTENT_BOTTOM = FOOTER_START_FRAC * OUT_H;  // ≈ 689.6 pt from top
-const CONTENT_H = CONTENT_BOTTOM - CONTENT_TOP;   // ≈ 586.9 pt available
 
 export async function applyLetterhead(
   sourceFile: File
@@ -70,33 +62,33 @@ export async function applyLetterhead(
     const srcW = srcPage.getWidth();
     const srcH = srcPage.getHeight();
 
-    // Scale Crystal Reports to fill the content area (maintain aspect ratio)
-    const scale = Math.min(OUT_W / srcW, CONTENT_H / srcH);
+    // Scale Crystal Reports to the maximum size that fits A4 while preserving
+    // aspect ratio.  For a standard Letter page (612×792 pt) this is ≈ 0.972×,
+    // virtually lossless.  For an A4 source it is exactly 1.0×.
+    const scale = Math.min(OUT_W / srcW, OUT_H / srcH);
     const drawW = srcW * scale;
     const drawH = srcH * scale;
 
-    // Centre horizontally; align top of report content with bottom of letterhead header
+    // Centre horizontally; top-align vertically (pdf-lib y-origin is bottom-left).
+    // Transparent zone ends at row 1292 = 730pt from A4 top, which fully covers
+    // the CR signature marks at ~703–728pt — no shift needed.
     const drawX = (OUT_W - drawW) / 2;
-    // pdf-lib y origin is bottom-left; position so top of draw area = CONTENT_TOP from page top
-    const drawY = OUT_H - CONTENT_TOP - drawH;
+    const drawY = OUT_H - drawH;
 
     const page = outDoc.addPage([OUT_W, OUT_H]);
 
-    // Layer 0 — solid white background; prevents the PDF transparency
-    //           from rendering as a gray checkerboard in viewers/printers
+    // Layer 0 — solid white background
     page.drawRectangle({ x: 0, y: 0, width: OUT_W, height: OUT_H, color: rgb(1, 1, 1) });
 
-    // Layer 1 — Crystal Reports content (scaled to sit within the content area)
+    // Layer 1 — Crystal Reports content (near-full scale, top-aligned)
     page.drawPage(embeddedPage, { x: drawX, y: drawY, width: drawW, height: drawH });
 
-    // Layer 2 — Letterhead on top (opaque header + footer cover CR margins;
-    //           transparent body reveals CR content — no overlap, no tint)
+    // Layer 2 — Letterhead on top
     page.drawImage(letterheadImg, { x: 0, y: 0, width: OUT_W, height: OUT_H });
   }
 
   const outBytes = await outDoc.save();
   const baseName = sourceFile.name.replace(/\.pdf$/i, "");
-  // pdf-lib returns Uint8Array<ArrayBufferLike>; slice() gives a plain ArrayBuffer
   const outBuffer = outBytes.buffer.slice(
     outBytes.byteOffset,
     outBytes.byteOffset + outBytes.byteLength

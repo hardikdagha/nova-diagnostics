@@ -27,8 +27,8 @@ export function HeroSection() {
 
         {/* Left — editorial text block */}
         <div className="min-w-0 animate-fade-up">
-          <h1 className="text-[2.6rem] font-bold leading-[1.15] tracking-tight text-slate-950 md:text-5xl lg:text-[3.25rem]">
-            Accurate diagnostics, handled with care.
+          <h1 className="text-[2.1rem] font-bold leading-[1.15] tracking-tight text-slate-950 md:text-[2.6rem] lg:text-[2.875rem]">
+            Accurate diagnostics, committed to care.
           </h1>
 
           <p className="mt-6 max-w-lg text-lg leading-8 text-slate-500">
