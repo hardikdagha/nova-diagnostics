@@ -44,7 +44,7 @@ export default function HomeCollectionsPage() {
   const [canDelete, setCanDelete] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const lastActivityRef = useRef(Date.now());
+  const lastActivityRef = useRef(0);
 
   const [confirmedDate, setConfirmedDate] = useState("");
   const [confirmedTimeSlot, setConfirmedTimeSlot] = useState("");
@@ -72,6 +72,7 @@ export default function HomeCollectionsPage() {
   }, []);
 
   useEffect(() => {
+    lastActivityRef.current = Date.now();
     const touch = () => { lastActivityRef.current = Date.now(); };
     const evts = ["mousemove", "mousedown", "keydown", "touchstart", "scroll", "click"] as const;
     evts.forEach((ev) => window.addEventListener(ev, touch, { passive: true }));

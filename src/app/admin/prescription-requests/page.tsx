@@ -41,7 +41,7 @@ export default function PrescriptionRequestsPage() {
   const [canDelete, setCanDelete] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const lastActivityRef = useRef(Date.now());
+  const lastActivityRef = useRef(0);
 
   async function load() {
     const { data } = await supabase
@@ -63,6 +63,7 @@ export default function PrescriptionRequestsPage() {
 
   // Track user activity so auto-refresh is suppressed during active use
   useEffect(() => {
+    lastActivityRef.current = Date.now();
     const touch = () => { lastActivityRef.current = Date.now(); };
     const evts = ["mousemove", "mousedown", "keydown", "touchstart", "scroll", "click"] as const;
     evts.forEach((ev) => window.addEventListener(ev, touch, { passive: true }));
