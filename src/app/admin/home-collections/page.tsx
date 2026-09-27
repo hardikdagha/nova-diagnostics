@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AlertTriangle, Calendar, CheckCircle, Copy, ExternalLink, FileText, Home, Mail, MapPin, MessageSquare, Phone, Search, Trash2, X } from "lucide-react";
+import { useAdminEmailComposer } from "@/components/admin/AdminEmailComposer";
 import { staffSupabase as supabase } from "@/lib/supabase/staffClient";
 import type { HomeCollectionRequest } from "@/lib/supabase/types";
 
@@ -33,6 +34,7 @@ const STATUS_CHIP: Record<string, string> = {
 };
 
 export default function HomeCollectionsPage() {
+  const { openComposer } = useAdminEmailComposer();
   const [rows, setRows] = useState<HomeCollectionRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -256,6 +258,13 @@ export default function HomeCollectionsPage() {
           >
             <MessageSquare className="size-3.5" /> WhatsApp
           </a>
+          <button
+            type="button"
+            onClick={() => openComposer({ to: selected.email, recipientName: selected.full_name })}
+            className="btn-secondary flex-1 justify-center gap-1.5 text-xs"
+          >
+            <Mail className="size-3.5" aria-hidden="true" /> Email
+          </button>
         </div>
 
         <dl className="space-y-2 text-xs">

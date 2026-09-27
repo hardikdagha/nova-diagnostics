@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { staffSupabase } from "@/lib/supabase/staffClient";
+import { AdminComposeEmailButton, AdminEmailProvider } from "@/components/admin/AdminEmailComposer";
 
 type QueueCounts = {
   homeCollections: number;
@@ -251,6 +252,7 @@ export default function AdminLayoutShell({ children }: { children: React.ReactNo
   const emailInitial = displayStaffEmail?.trim()[0]?.toUpperCase() ?? "S";
 
   return (
+    <AdminEmailProvider>
     <div className="min-h-screen bg-[#f4f6f8] text-slate-900">
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-[264px] flex-col border-r border-white/5 bg-[#071a2b] text-white lg:flex">
         <div className="px-5 pb-6 pt-5">
@@ -351,6 +353,8 @@ export default function AdminLayoutShell({ children }: { children: React.ReactNo
               />
             </form>
 
+            {isPreviewRoute ? null : <AdminComposeEmailButton />}
+
             <div className="hidden items-center gap-2 border-l border-slate-200 pl-4 text-[12px] font-medium text-slate-600 sm:flex">
               <MapPin className="size-4 text-teal-700" aria-hidden="true" />
               <span>{siteConfig.area}, {siteConfig.city}</span>
@@ -383,5 +387,6 @@ export default function AdminLayoutShell({ children }: { children: React.ReactNo
         </main>
       </div>
     </div>
+    </AdminEmailProvider>
   );
 }

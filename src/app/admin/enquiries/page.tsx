@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ClipboardList, MessageSquare, Phone, Search, Trash2, X } from "lucide-react";
+import { ClipboardList, Mail, MessageSquare, Phone, Search, Trash2, X } from "lucide-react";
+import { useAdminEmailComposer } from "@/components/admin/AdminEmailComposer";
 import { staffSupabase as supabase } from "@/lib/supabase/staffClient";
 import type { ContactEnquiry } from "@/lib/supabase/types";
 
@@ -27,6 +28,7 @@ const STATUS_CHIP: Record<string, string> = {
 };
 
 export default function EnquiriesPage() {
+  const { openComposer } = useAdminEmailComposer();
   const [rows, setRows] = useState<ContactEnquiry[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -138,6 +140,13 @@ export default function EnquiriesPage() {
           >
             <MessageSquare className="size-3.5" /> WhatsApp
           </a>
+          <button
+            type="button"
+            onClick={() => openComposer({ to: selected.email, recipientName: selected.full_name })}
+            className="btn-secondary flex-1 justify-center gap-1.5 text-xs"
+          >
+            <Mail className="size-3.5" aria-hidden="true" /> Email
+          </button>
         </div>
 
         {/* Info */}
